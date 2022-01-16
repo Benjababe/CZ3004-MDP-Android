@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Android Remote</string>
+
+    <string name="robo_status">Robot Status</string>
+    <string name="robo_direction">Robot Direction</string>
+    <string name="robo_position">Robot Position</string>
+
+    <string name="img_recog_description">Image recognised will be displayed here</string>
+    <string name="img_recog_subtitle">Image recognised</string>
+    <string name="btn_accel_description">Accelerates robot</string>
+    <string name="btn_reverse_description">Reverses robot</string>
+
+    <string name="console">Debug messages will be printed here</string>
+
+    <string name="image_recog">Image Recognition</string>
+    <string name="fastest_path">Fastest Path</string>
+    <string name="connect">Connect</string>
+    <string name="reset">Reset</string>
+    <string name="temp">Temp</string>
+
+    <string name="title_spawn">Select Spawn</string>
+    <string name="btn_robot">Robot</string>
+    <string name="btn_obstacle">Obstacle</string>
+
+    <string name="btn_left_description">Steers left</string>
+    <string name="btn_right_description">Steers right</string>
+</resources>

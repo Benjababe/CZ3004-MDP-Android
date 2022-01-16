@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:left="@dimen/map_obs_offset"
+        android:right="@dimen/map_obs_offset"
+        android:bottom="@dimen/map_obs_offset">
+        <shape
+            android:shape="rectangle">
+            <solid android:color="@color/map_obs_color" />
+            <stroke
+                android:width="@dimen/map_obs_border"
+                android:color="#FF0000" />
+            <corners android:radius="@dimen/map_obs_radius"/>
+        </shape>
+    </item>
+</layer-list>
