@@ -64,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> activityLauncher;
 
     BluetoothService bluetoothService;
-    boolean btConnected = false;
 
     ConsoleFragment fragmentConsole;
     Button btnConnect;
