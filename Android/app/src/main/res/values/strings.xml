@@ -14,7 +14,7 @@
 
     <string name="image_recog">Image Recognition</string>
     <string name="fastest_path">Fastest Path</string>
-    <string name="connect">Connect</string>
+    <string name="connect">Not Connected</string>
     <string name="reset">Reset</string>
     <string name="temp">Temp</string>
 

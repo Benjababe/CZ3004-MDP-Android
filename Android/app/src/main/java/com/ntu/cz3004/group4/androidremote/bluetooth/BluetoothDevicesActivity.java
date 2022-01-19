@@ -37,12 +37,10 @@ public class BluetoothDevicesActivity extends AppCompatActivity {
         // [TODO] Discover devices not paired -> Allow uses to pair from app?
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
-        ArrayList<BluetoothDevice> list = new ArrayList();
+        ArrayList<BluetoothDevice> list = new ArrayList<>();
 
         if(!pairedDevices.isEmpty()) {
-            for(BluetoothDevice device : pairedDevices) {
-                list.add(device);
-            }
+            list.addAll(pairedDevices);
 
             devicesListView = findViewById(R.id.lv_devices);
             devicesAdapter = new DeviceAdapter(BluetoothDevicesActivity.this, list);
@@ -77,7 +75,7 @@ public class BluetoothDevicesActivity extends AppCompatActivity {
         }
 
         private void onClickConnect(BluetoothDevice device) {
-            Activity ctx = ((Activity) getContext());
+            Activity ctx = (Activity) getContext();
             Intent data = new Intent();
             data.putExtra("bluetooth_address", device.getAddress());
             ctx.setResult(Activity.RESULT_OK, data);

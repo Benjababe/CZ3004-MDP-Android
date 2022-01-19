@@ -1,24 +1,31 @@
 package com.ntu.cz3004.group4.androidremote.bluetooth;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import com.ntu.cz3004.group4.androidremote.Constants;
+import com.ntu.cz3004.group4.androidremote.R;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
 
 public class BluetoothService {
-    private static String TAG = "BluetoothService";
+    private static final String TAG = "BluetoothService";
 
     private static final String APP_NAME = "BluetoothChatSecure";
     private static final UUID APP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -27,12 +34,10 @@ public class BluetoothService {
     private ConnectedThread connectedThread = null;
     private AcceptThread acceptThread = null;
 
-    BluetoothAdapter bluetoothAdapter;
-
-    private Context context;
-    private Handler handler;
-    private int state;
-    private int newState;
+    private final Activity activity;
+    private final Handler handler;
+    private BluetoothAdapter bluetoothAdapter;
+    public int state;
 
     // Constants that indicate the current connection state
     public static final int STATE_NONE = 0;       // we're doing nothing
@@ -40,12 +45,12 @@ public class BluetoothService {
     public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
     public static final int STATE_CONNECTED = 3;  // now connected to a remote device
 
-    public BluetoothService(Context context, Handler handler) {
-        this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        this.context = context;
+    public BluetoothService(Activity activity, Handler handler) {
+        this.activity = activity;
         this.handler = handler;
+
+        this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         this.state = STATE_NONE;
-        this.newState = state;
     }
 
     public synchronized void start() {
@@ -66,7 +71,8 @@ public class BluetoothService {
             acceptThread.start();
         }
 
-        // Update UI title
+        // update UI
+        updateBTConnected(STATE_NONE);
     }
 
     public synchronized void connect(BluetoothDevice device) {
@@ -89,11 +95,12 @@ public class BluetoothService {
 
         connectThread = new ConnectThread(device);
         connectThread.start();
-        // update ui
+
+        // update UI
+        updateBTConnected(STATE_CONNECTING);
     }
 
     public synchronized void connected(BluetoothSocket bluetoothSocket, BluetoothDevice bluetoothDevice) {
-
         if (connectedThread != null) {
             connectedThread.cancel();
             connectedThread = null;
@@ -113,11 +120,11 @@ public class BluetoothService {
         message.setData(bundle);
         handler.sendMessage(message);
 
-        //update ui
+        //update UI
+        updateBTConnected(STATE_CONNECTED);
     }
 
     public synchronized void stop() {
-
         if (connectThread != null) {
             connectThread.cancel();
             connectThread = null;
@@ -136,6 +143,7 @@ public class BluetoothService {
         state = STATE_NONE;
 
         //update ui
+        updateBTConnected(STATE_NONE);
     }
 
     private void connectionFailed() {
@@ -146,7 +154,9 @@ public class BluetoothService {
         handler.sendMessage(message);
 
         state = STATE_NONE;
+
         // update ui
+        updateBTConnected(STATE_NONE);
     }
 
     private void connectionLost() {
@@ -157,7 +167,22 @@ public class BluetoothService {
         handler.sendMessage(message);
 
         state = STATE_NONE;
+
         // update ui
+        updateBTConnected(STATE_NONE);
+    }
+
+    private void updateBTConnected(int status) {
+        ArrayList<String> text = new ArrayList<>(Arrays.asList("Not Connected", "", "Connecting", "Connected"));
+        ArrayList<String> col = new ArrayList<>(Arrays.asList("#FFFF0000", "", "#FFFFFF00", "#FF00FF00"));
+        Button btnConnect = this.activity.findViewById(R.id.btnConnect);
+
+        this.activity.runOnUiThread(() -> {
+            btnConnect.setText(text.get(status));
+            btnConnect.setTextColor(Color.parseColor(col.get(status)));
+        });
+
+
     }
 
     public void write(byte[] out) {
@@ -172,7 +197,7 @@ public class BluetoothService {
 
     private class ConnectThread extends Thread {
         private BluetoothSocket bluetoothSocket;
-        private BluetoothDevice bluetoothDevice;
+        private final BluetoothDevice bluetoothDevice;
 
         public ConnectThread(BluetoothDevice bluetoothDevice) {
             this.bluetoothDevice = bluetoothDevice;
@@ -242,7 +267,7 @@ public class BluetoothService {
         }
 
         public void run() {
-            BluetoothSocket socket = null;
+            BluetoothSocket socket;
 
             while (state != STATE_CONNECTED) {
                 try {

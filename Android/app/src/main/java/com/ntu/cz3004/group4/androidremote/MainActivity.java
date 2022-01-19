@@ -4,6 +4,8 @@ import static android.view.DragEvent.ACTION_DRAG_ENTERED;
 import static android.view.DragEvent.ACTION_DRAG_EXITED;
 import static android.view.DragEvent.ACTION_DROP;
 
+import static com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService.STATE_CONNECTED;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
@@ -22,8 +24,6 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.DragEvent;
@@ -34,38 +34,64 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.ntu.cz3004.group4.androidremote.arena.ArenaButton;
+import com.ntu.cz3004.group4.androidremote.arena.ObstacleInfo;
 import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothDevicesActivity;
 import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService;
-import com.ntu.cz3004.group4.androidremote.map.Map;
+import com.ntu.cz3004.group4.androidremote.arena.Arena;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Set;
 
 
-@SuppressWarnings({"ConstantConditions", "deprecation"})
+@SuppressWarnings({"ConstantConditions"})
 public class MainActivity extends AppCompatActivity {
     // 20x20 map variables
-    int x, y, btnH, btnW;
-    HashMap<Integer, Integer> obstacles = new HashMap<>();
+    int x, y, btnH, btnW, drawn = 0;
+
+    final String btAlert = "Connect via bluetooth before tampering with the map";
+
+    HashMap<Integer, ObstacleInfo> obstacles = new HashMap<>();
     Drawable btnBG = null;
 
-    private ActivityResultLauncher activityLauncher;
+    private ActivityResultLauncher<Intent> activityLauncher;
 
     BluetoothService bluetoothService;
     boolean btConnected = false;
 
     ConsoleFragment fragmentConsole;
     Button btnConnect;
+    TextView txtConsole;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        txtConsole = findViewById(R.id.txtConsole);
+
+        initBT();
+
+        // draws a 20x20 map for robot traversal when first rendered
+        TableLayout mapTable = findViewById(R.id.mapTable);
+        mapTable.getViewTreeObserver().addOnPreDrawListener(() -> {
+            Log.d("DRAW", "Map Drawn");
+            if (drawn < 1) {
+                initMap(mapTable);
+                drawn++;
+            }
+            return true;
+        });
+    }
+
+    private void initBT() {
         btnConnect = findViewById(R.id.btnConnect);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -74,54 +100,56 @@ public class MainActivity extends AppCompatActivity {
         bluetoothService = new BluetoothService(MainActivity.this, fragmentConsole.getHandler());
         fragmentConsole.setBluetoothService(bluetoothService);
 
-        setBtConnected(false);
+        promptBTPermissions();
+        listenBTFragment();
+    }
 
+    private void promptBTPermissions() {
         // permissions to handle bluetooth
         if (checkSelfPermission(Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED) {
             btnConnect.setEnabled(true);
         } else if (shouldShowRequestPermissionRationale(Manifest.permission.BLUETOOTH)) {
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder
-                .setMessage("This app requires Bluetooth to connect to the robot")
-                .setTitle("Alert");
+                    .setMessage("This app requires Bluetooth to connect to the robot")
+                    .setTitle("Alert");
 
             AlertDialog dialog = builder.create();
             dialog.show();
 
             btnConnect.setEnabled(false);
         }
+    }
 
+    private void listenBTFragment() {
         activityLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if(result.getResultCode() == Activity.RESULT_OK) {
+                // retrieves data sent from closed BT intent
                 Intent intent = result.getData();
-                String address = (String) (intent.getExtras().get("bluetooth_address"));
+                Bundle intentBundle = intent.getExtras();
+                String address = intentBundle.getString("bluetooth_address");
+
+                // connects with the selected device from BT intent
                 BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
                 BluetoothDevice device = adapter.getRemoteDevice(address);
-                setBtConnected(true);
                 bluetoothService.connect(device);
-                fragmentConsole.setBluetoothService(bluetoothService);
+
+                // updates UI on connection
+                if (bluetoothService.state == STATE_CONNECTED) {
+                    fragmentConsole.setBluetoothService(bluetoothService);
+                    //setBtConnected(true);
+                }
             }
         });
-
-        // draws a 20x20 map for robot traversal
-        initMap();
     }
 
-    private void setBtConnected(boolean status) {
-        btConnected = status;
-
-        btnConnect.setText(btConnected ? "Connected" : "Not Connected");
-        btnConnect.setTextColor(Color.parseColor(btConnected ? "#FFFFFFFF" : "#FFFF0000"));
-    }
-
-    private void initMap() {
+    private void initMap(TableLayout mapTable) {
         // set cell height and width
         btnH = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 25, getResources().getDisplayMetrics());
         btnW = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 25, getResources().getDisplayMetrics());
 
         // default background for cell
         btnBG = AppCompatResources.getDrawable(this, R.drawable.btn_background);
-        TableLayout mapTable = findViewById(R.id.mapTable);
 
         // 20x20 map
         for (y = 0; y < 20; y++) {
@@ -129,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
             row.setHorizontalGravity(Gravity.CENTER_HORIZONTAL);
 
             for (x = 0; x < 20; x++) {
-                Button btn = new Button(this);
+                ArenaButton btn = new ArenaButton(this, x, y);
                 btn.setId(View.generateViewId());
                 btn.setPadding(1, 1, 1, 1);
                 btn.setBackground(btnBG);
@@ -145,9 +173,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // returns specified cell to regular state
-    private void emptyCell(Button btn, Drawable background) {
-        int val = Integer.parseInt(btn.getText().toString());
-        obstacles.remove(val);
+    private void emptyCell(ArenaButton btn, Drawable background) {
+        int obstacleID = Integer.parseInt(btn.getText().toString());
+
+        // updates robot on obstacle removal
+        ObstacleInfo obstacleInfo = obstacles.get(obstacleID);
+        sendRemoveObstacle(obstacleInfo);
+
+        obstacles.remove(obstacleID);
         btn.setText("");
         btn.setBackground(background);
     }
@@ -164,7 +197,13 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View view) {
-            Button btn = findViewById(this.id);
+            // stops listener if not connected via bluetooth yet
+            if (bluetoothService.state != STATE_CONNECTED) {
+                Toast.makeText(MainActivity.this, btAlert, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            ArenaButton btn = findViewById(this.id);
 
             // removes item if it's on cell
             if (!btn.getText().equals("")) {
@@ -174,7 +213,6 @@ public class MainActivity extends AppCompatActivity {
 
             // get checked radiobutton value
             String spawn = getSpawn();
-
 
             // adds robot onto map
             if (spawn.equals(getResources().getString(R.string.btn_robot))) {
@@ -226,7 +264,7 @@ public class MainActivity extends AppCompatActivity {
                         ClipData dragData = e.getClipData();
                         JSONObject json = new JSONObject(dragData.getItemAt(0).getText().toString());
 
-                        Button originalBtn = (Button) e.getLocalState();
+                        ArenaButton originalBtn = (ArenaButton) e.getLocalState();
 
                         // stops if dropped cell is same as original cell
                         if (originalBtn.getId() == newCell.getId())
@@ -257,15 +295,18 @@ public class MainActivity extends AppCompatActivity {
         // direction default to Top
         final String[] dirSelected = {"Top"};
 
+        // retrieves direction of image on obstacle through radiobuttons
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Choose direction of image");
         builder.setSingleChoiceItems(directions, 0, (dialogInterface, i) -> dirSelected[0] = directions[i]);
 
+        // confirm to add obstacle
         builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
             addObstacle(obstacleID, btnID, dirSelected[0]);
             dialogInterface.dismiss();
         });
 
+        // exit process
         builder.setNegativeButton("Cancel", (dialogInterface, i) -> dialogInterface.dismiss());
 
         builder.show();
@@ -277,23 +318,27 @@ public class MainActivity extends AppCompatActivity {
 
         // get drawable ID for image direction
         switch(dirSelected) {
+            case "Right":
+                borderID = R.drawable.right_border;
+                break;
             case "Bottom":
                 borderID = R.drawable.bottom_border;
                 break;
-
             case "Left":
                 borderID = R.drawable.left_border;
-                break;
-
-            case "Right":
-                borderID = R.drawable.right_border;
                 break;
         }
 
         // add obstacle id to cell
-        obstacles.put(obstacleID, btnID);
-        Button btn = findViewById(btnID);
+        ArenaButton btn = findViewById(btnID);
         btn.setText(String.valueOf(obstacleID));
+
+        // keeps track of obstacle in memory
+        ObstacleInfo obstacleInfo = new ObstacleInfo(obstacleID, btnID, btn.x, btn.y, dirSelected);
+        obstacles.put(obstacleID, obstacleInfo);
+
+        // sends addition of obstacle over to robot
+        sendAddObstacleData(obstacleInfo);
 
         // draws direction of image onto cell
         Drawable border = AppCompatResources.getDrawable(this, borderID);
@@ -317,7 +362,7 @@ public class MainActivity extends AppCompatActivity {
                 );
 
                 // shadow will just be the button itself
-                View.DragShadowBuilder shadow = new Map.MyDragShadowBuilder(btn);
+                View.DragShadowBuilder shadow = new Arena.MyDragShadowBuilder(btn);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
                     view.startDragAndDrop(dragData, shadow, btn, 0);
@@ -333,38 +378,64 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void sendAddObstacleData(ObstacleInfo obstacleInfo) {
+        if (bluetoothService.state == STATE_CONNECTED)
+            bluetoothService.write(obstacleInfo.toAddBytes());
+        else
+            Toast.makeText(this, btAlert, Toast.LENGTH_LONG).show();
+    }
+
+    private void sendRemoveObstacle(ObstacleInfo obstacleInfo) {
+        if (bluetoothService.state == STATE_CONNECTED)
+            bluetoothService.write(obstacleInfo.toRemoveBytes());
+        else
+            Toast.makeText(this, btAlert, Toast.LENGTH_LONG).show();
+    }
+
     // Clears all cells back to default state
     public void Reset(View view) {
         Set<Integer> keys = obstacles.keySet();
 
         for (int key: keys) {
-            int buttonID = obstacles.get(key);
-            Button btn = findViewById(buttonID);
+            ObstacleInfo obstacleInfo = obstacles.get(key);
+            int btnID = obstacleInfo.btnID;
+            ArenaButton btn = findViewById(btnID);
 
             btn.setText("");
             btn.setBackground(btnBG);
             btn.setOnLongClickListener(null);
+
+            // updates robot on obstacle removal
+            sendRemoveObstacle(obstacleInfo);
         }
 
         obstacles.clear();
     }
 
     public void onBtnConnectClick(View view) {
-//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//        builder.setTitle("Bluetooth");
-//
-//        final View layout = getLayoutInflater().inflate(R.layout.bluetooth_menu, null);
-//        builder.setView(layout);
-//
-//        ListView btListView = findViewById(R.id.btListView);
-//        setupBluetooth();
-//        btListView.isOpaque();
-//
-//        AlertDialog dialog = builder.create();
-//        dialog.show();
         Intent intent = new Intent(MainActivity.this, BluetoothDevicesActivity.class);
         bluetoothService.start();
         activityLauncher.launch(intent);
+    }
+
+    public void onBtnAccelClick(View view) {
+        if (bluetoothService.state == STATE_CONNECTED)
+            bluetoothService.write("f".getBytes(StandardCharsets.UTF_8));
+    }
+
+    public void onBtnReverseClick(View view) {
+        if (bluetoothService.state == STATE_CONNECTED)
+            bluetoothService.write("r".getBytes(StandardCharsets.UTF_8));
+    }
+
+    public void onBtnSteerLeftClick(View view) {
+        if (bluetoothService.state == STATE_CONNECTED)
+            bluetoothService.write("sl".getBytes(StandardCharsets.UTF_8));
+    }
+
+    public void onBtnSteerRightClick(View view) {
+        if (bluetoothService.state == STATE_CONNECTED)
+            bluetoothService.write("sr".getBytes(StandardCharsets.UTF_8));
     }
 }
 

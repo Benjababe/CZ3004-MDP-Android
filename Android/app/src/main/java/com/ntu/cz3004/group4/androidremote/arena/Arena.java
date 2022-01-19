@@ -1,13 +1,17 @@
-package com.ntu.cz3004.group4.androidremote.map;
+package com.ntu.cz3004.group4.androidremote.arena;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.View;
+import android.widget.Button;
 
-public class Map {
+import androidx.appcompat.widget.AppCompatButton;
+
+public class Arena {
     public static class MyDragShadowBuilder extends View.DragShadowBuilder {
 
         // The drag shadow image, defined as a drawable object.

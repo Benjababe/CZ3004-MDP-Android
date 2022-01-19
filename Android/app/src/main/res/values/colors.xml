@@ -9,4 +9,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="map_obs_color">#000000</color>
     <color name="map_btn_color">#888888</color>
+    <color name="btn_connect_red">#FF0000</color>
 </resources>

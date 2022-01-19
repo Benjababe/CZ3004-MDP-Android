@@ -10,8 +10,8 @@
         android:id="@+id/linearLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:orientation="horizontal"
         android:baselineAligned="false"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -21,7 +21,7 @@
             android:id="@+id/control_left"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.2"
+            android:layout_weight="0.25"
             android:orientation="vertical">
 
             <TextView
@@ -47,9 +47,10 @@
 
             <ImageView
                 android:id="@+id/imgRecog"
-                android:layout_width="match_parent"
-                android:layout_height="140dp"
-                android:layout_marginTop="30dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="15dp"
                 android:contentDescription="@string/img_recog_description"
                 app:srcCompat="@android:drawable/ic_menu_view"
                 tools:ignore="ImageContrastCheck" />
@@ -57,8 +58,16 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/img_recog_subtitle"
-                android:layout_gravity="center"/>
+                android:layout_gravity="center"
+                android:text="@string/img_recog_subtitle" />
+
+            <TextView
+                android:id="@+id/txtConsole"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginTop="30dp"
+                android:background="@drawable/border"
+                android:text="@string/console" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -72,6 +81,7 @@
                     android:layout_marginHorizontal="20dp"
                     android:layout_marginBottom="100dp"
                     android:contentDescription="@string/btn_accel_description"
+                    android:onClick="onBtnAccelClick"
                     app:srcCompat="@android:drawable/arrow_up_float"
                     tools:ignore="ImageContrastCheck" />
 
@@ -83,6 +93,7 @@
                     android:layout_marginHorizontal="20dp"
                     android:layout_marginBottom="30dp"
                     android:contentDescription="@string/btn_reverse_description"
+                    android:onClick="onBtnReverseClick"
                     app:srcCompat="@android:drawable/arrow_down_float"
                     tools:ignore="ImageContrastCheck" />
             </RelativeLayout>
@@ -94,13 +105,13 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginStart="10dp"
-            android:layout_weight="0.6"
+            android:layout_weight="0.55"
             android:orientation="vertical">
 
             <TableLayout
                 android:id="@+id/mapTable"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/fragmentConsole"
@@ -112,12 +123,12 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/control_right"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:orientation="vertical"
             android:layout_marginStart="10dp"
             android:layout_weight="0.2"
-            android:id="@+id/control_right">
+            android:orientation="vertical">
 
             <Button
                 android:id="@+id/btnImageRecog"
@@ -136,7 +147,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:onClick="onBtnConnectClick"
-                android:text="@string/connect" />
+                android:text="@string/connect"
+                android:textColor="@color/btn_connect_red" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -210,6 +222,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:contentDescription="@string/btn_left_description"
+                        android:onClick="onBtnSteerLeftClick"
                         app:srcCompat="@drawable/ic_arrow_left"
                         tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
 
@@ -219,6 +232,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:contentDescription="@string/btn_right_description"
+                        android:onClick="onBtnSteerRightClick"
                         app:srcCompat="@drawable/ic_arrow_right"
                         tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
                 </LinearLayout>

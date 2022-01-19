@@ -25,7 +25,7 @@ public class ConsoleFragment extends Fragment {
 
     private ListView listViewConsole;
     private EditText editTextPrompt;
-    private ImageButton btnSend;
+    private Button btnSend;
 
     private ArrayAdapter<String> consoleArrayAdapter;
     private String connectedDeviceName;
@@ -50,7 +50,7 @@ public class ConsoleFragment extends Fragment {
                 // save the connected device's name
                 btnSend.setEnabled(true);
                 connectedDeviceName = message.getData().getString(Constants.DEVICE_NAME);
-                if (null != this) {
+                if (connectedDeviceName != null) {
                     Toast.makeText(getContext(), "Connected to " + connectedDeviceName, Toast.LENGTH_SHORT).show();
                 }
                 break;
@@ -76,13 +76,13 @@ public class ConsoleFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        listViewConsole = getView().findViewById(R.id.lv_console);
-        editTextPrompt = getView().findViewById(R.id.et_command);
-        btnSend = getView().findViewById(R.id.btn_send);
+        listViewConsole = view.findViewById(R.id.lv_console);
+        editTextPrompt = view.findViewById(R.id.et_command);
+        btnSend = view.findViewById(R.id.btn_send);
 
         btnSend.setOnClickListener(v -> onClickSend());
 
-        consoleArrayAdapter = new ArrayAdapter<String>(getContext(), R.layout.item_message);
+        consoleArrayAdapter = new ArrayAdapter<>(getContext(), R.layout.item_message);
         listViewConsole.setAdapter(consoleArrayAdapter);
     }
 
