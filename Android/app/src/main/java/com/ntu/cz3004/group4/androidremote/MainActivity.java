@@ -4,30 +4,39 @@ import static android.view.DragEvent.ACTION_DRAG_ENTERED;
 import static android.view.DragEvent.ACTION_DRAG_EXITED;
 import static android.view.DragEvent.ACTION_DROP;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.fragment.app.FragmentManager;
 
+import android.Manifest;
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.ClipData;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TableLayout;
 import android.widget.TableRow;
-import android.widget.Toast;
 
+import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothDevicesActivity;
+import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService;
 import com.ntu.cz3004.group4.androidremote.map.Map;
 
 import org.json.JSONException;
@@ -44,20 +53,65 @@ public class MainActivity extends AppCompatActivity {
     HashMap<Integer, Integer> obstacles = new HashMap<>();
     Drawable btnBG = null;
 
-    BluetoothAdapter btAdapter;
+    private ActivityResultLauncher activityLauncher;
+
+    BluetoothService bluetoothService;
     boolean btConnected = false;
+
+    ConsoleFragment fragmentConsole;
+    Button btnConnect;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button btnConnect = findViewById(R.id.btnConnect);
-        btnConnect.setText(btConnected ? "Connected" : "Not Connected");
-        btnConnect.setTextColor(Color.parseColor(btConnected ? "#FFFFFFFF" : "#FFFF0000"));
+        btnConnect = findViewById(R.id.btnConnect);
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentConsole = (ConsoleFragment) fragmentManager.findFragmentById(R.id.fragmentConsole);
+
+        bluetoothService = new BluetoothService(MainActivity.this, fragmentConsole.getHandler());
+        fragmentConsole.setBluetoothService(bluetoothService);
+
+        setBtConnected(false);
+
+        // permissions to handle bluetooth
+        if (checkSelfPermission(Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED) {
+            btnConnect.setEnabled(true);
+        } else if (shouldShowRequestPermissionRationale(Manifest.permission.BLUETOOTH)) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder
+                .setMessage("This app requires Bluetooth to connect to the robot")
+                .setTitle("Alert");
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+
+            btnConnect.setEnabled(false);
+        }
+
+        activityLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if(result.getResultCode() == Activity.RESULT_OK) {
+                Intent intent = result.getData();
+                String address = (String) (intent.getExtras().get("bluetooth_address"));
+                BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+                BluetoothDevice device = adapter.getRemoteDevice(address);
+                setBtConnected(true);
+                bluetoothService.connect(device);
+                fragmentConsole.setBluetoothService(bluetoothService);
+            }
+        });
 
         // draws a 20x20 map for robot traversal
         initMap();
+    }
+
+    private void setBtConnected(boolean status) {
+        btConnected = status;
+
+        btnConnect.setText(btConnected ? "Connected" : "Not Connected");
+        btnConnect.setTextColor(Color.parseColor(btConnected ? "#FFFFFFFF" : "#FFFF0000"));
     }
 
     private void initMap() {
@@ -295,32 +349,22 @@ public class MainActivity extends AppCompatActivity {
         obstacles.clear();
     }
 
-    private void setupBluetooth() {
-        btAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (btAdapter == null){
-            int duration = Toast.LENGTH_SHORT;
-            Toast.makeText(this, "No Bluetooth on this device", duration).show();
-        }
-
-        if (!btAdapter.isEnabled()){
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, 0xDEADBEEF);
-        }
-    }
-
     public void onBtnConnectClick(View view) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Bluetooth");
-
-        final View layout = getLayoutInflater().inflate(R.layout.bluetooth_menu, null);
-        builder.setView(layout);
-
-        ListView btListView = findViewById(R.id.btListView);
-        setupBluetooth();
-        btListView.isOpaque();
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
+//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//        builder.setTitle("Bluetooth");
+//
+//        final View layout = getLayoutInflater().inflate(R.layout.bluetooth_menu, null);
+//        builder.setView(layout);
+//
+//        ListView btListView = findViewById(R.id.btListView);
+//        setupBluetooth();
+//        btListView.isOpaque();
+//
+//        AlertDialog dialog = builder.create();
+//        dialog.show();
+        Intent intent = new Intent(MainActivity.this, BluetoothDevicesActivity.class);
+        bluetoothService.start();
+        activityLauncher.launch(intent);
     }
 }
 

@@ -8,4 +8,5 @@
 
     <dimen name="map_btn_offset">-2dp</dimen>
     <dimen name="map_btn_border">2dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
 </resources>
