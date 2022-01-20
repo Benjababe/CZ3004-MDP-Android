@@ -42,18 +42,21 @@ import com.ntu.cz3004.group4.androidremote.arena.ArenaButton;
 import com.ntu.cz3004.group4.androidremote.arena.MyDragShadowBuilder;
 import com.ntu.cz3004.group4.androidremote.arena.ObstacleInfo;
 import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothDevicesActivity;
+import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothListener;
 import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
 
 
 @SuppressWarnings({"ConstantConditions"})
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements BluetoothListener {
     // 20x20 map variables
     int x, y, btnH, btnW, drawn = 0;
     int robotDrawable;
@@ -106,8 +109,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initBT() {
-        bluetoothService = new BluetoothService(MainActivity.this, fragmentConsole.getHandler());
+        bluetoothService = new BluetoothService(fragmentConsole.getHandler());
         fragmentConsole.setBluetoothService(bluetoothService);
+
+        // passes onBluetoothStatusChange defined here into BluetoothService so it can manipulate views
+        bluetoothService.setBluetoothStatusChange(this);
 
         promptBTPermissions();
         listenBTFragment();
@@ -150,6 +156,18 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    // adopted from BluetoothListener interface, used in BluetoothService class
+    public void onBluetoothStatusChange(int status) {
+        ArrayList<String> text = new ArrayList<>(Arrays.asList("Not Connected", "", "Connecting", "Connected"));
+        ArrayList<String> col = new ArrayList<>(Arrays.asList("#FFFF0000", "", "#FFFFFF00", "#FF00FF00"));
+
+        runOnUiThread(() -> {
+            btnConnect.setText(text.get(status));
+            btnConnect.setTextColor(Color.parseColor(col.get(status)));
+        });
+
     }
 
     private void initMap(TableLayout mapTable) {
@@ -255,10 +273,10 @@ public class MainActivity extends AppCompatActivity {
 
         robotDrawable = R.drawable.ic_robot_top;
 
+        imgRobot.setVisibility(View.VISIBLE);
         imgRobot.setImageResource(R.drawable.ic_robot_top);
         imgRobot.setX(btn.getX());
         imgRobot.setY(pt[1] - dpToPixels(24));
-        imgRobot.setVisibility(View.VISIBLE);
 
         imgRobot.setOnClickListener(view -> rotateRobot());
     }

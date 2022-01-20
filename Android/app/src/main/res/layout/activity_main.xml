@@ -115,10 +115,11 @@
 
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/fragmentConsole"
+                android:name="com.ntu.cz3004.group4.androidremote.ConsoleFragment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/border"
-                android:name="com.ntu.cz3004.group4.androidremote.ConsoleFragment" />
+                android:visibility="gone" />
 
             <ImageView
                 android:id="@+id/imgRobot"
