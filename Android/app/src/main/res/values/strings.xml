@@ -12,6 +12,8 @@
 
     <string name="console">Debug messages will be printed here</string>
 
+    <string name="img_robot_description">Robot image will be displayed here</string>
+
     <string name="image_recog">Image Recognition</string>
     <string name="fastest_path">Fastest Path</string>
     <string name="connect">Not Connected</string>

@@ -30,6 +30,7 @@ import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TableLayout;
@@ -38,10 +39,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ntu.cz3004.group4.androidremote.arena.ArenaButton;
+import com.ntu.cz3004.group4.androidremote.arena.MyDragShadowBuilder;
 import com.ntu.cz3004.group4.androidremote.arena.ObstacleInfo;
 import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothDevicesActivity;
 import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService;
-import com.ntu.cz3004.group4.androidremote.arena.Arena;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,6 +56,7 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity {
     // 20x20 map variables
     int x, y, btnH, btnW, drawn = 0;
+    int robotDrawable;
 
     final String btAlert = "Connect via bluetooth before tampering with the map";
 
@@ -68,18 +70,19 @@ public class MainActivity extends AppCompatActivity {
     ConsoleFragment fragmentConsole;
     Button btnConnect;
     TextView txtConsole;
+    ImageView imgRobot;
+    TableLayout mapTable;
+    RadioGroup spawnGroup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        txtConsole = findViewById(R.id.txtConsole);
-
+        initViews();
         initBT();
 
         // draws a 20x20 map for robot traversal when first rendered
-        TableLayout mapTable = findViewById(R.id.mapTable);
         mapTable.getViewTreeObserver().addOnPreDrawListener(() -> {
             Log.d("DRAW", "Map Drawn");
             if (drawn < 1) {
@@ -90,12 +93,19 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void initBT() {
-        btnConnect = findViewById(R.id.btnConnect);
-
+    // finds all used views in UI
+    private void initViews() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentConsole = (ConsoleFragment) fragmentManager.findFragmentById(R.id.fragmentConsole);
 
+        btnConnect = findViewById(R.id.btnConnect);
+        txtConsole = findViewById(R.id.txtConsole);
+        imgRobot = findViewById(R.id.imgRobot);
+        mapTable = findViewById(R.id.mapTable);
+        spawnGroup = findViewById(R.id.spawnGroup);
+    }
+
+    private void initBT() {
         bluetoothService = new BluetoothService(MainActivity.this, fragmentConsole.getHandler());
         fragmentConsole.setBluetoothService(bluetoothService);
 
@@ -215,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
 
             // adds robot onto map
             if (spawn.equals(getResources().getString(R.string.btn_robot))) {
-                Log.d("Robo", "Spawning robot");
+                spawnRobot(btn);
             }
 
             // adds obstacle otherwise
@@ -233,10 +243,70 @@ public class MainActivity extends AppCompatActivity {
 
     // gets text value of radiobutton selected
     private String getSpawn() {
-        RadioGroup spawnGroup = findViewById(R.id.spawnGroup);
         int btnID = spawnGroup.getCheckedRadioButtonId();
         RadioButton btn = findViewById(btnID);
         return btn.getText().toString();
+    }
+
+    // spawns robot image on button position
+    private void spawnRobot(ArenaButton btn) {
+        int[] pt = new int[2];
+        btn.getLocationInWindow(pt);
+
+        robotDrawable = R.drawable.ic_robot_top;
+
+        imgRobot.setImageResource(R.drawable.ic_robot_top);
+        imgRobot.setX(btn.getX());
+        imgRobot.setY(pt[1] - dpToPixels(24));
+        imgRobot.setVisibility(View.VISIBLE);
+
+        imgRobot.setOnClickListener(view -> rotateRobot());
+    }
+
+
+    private int dpToPixels(int dp) {
+        return (int) (dp * getResources().getDisplayMetrics().density);
+    }
+
+
+    private void rotateRobot() {
+        if (robotDrawable == R.drawable.ic_robot_top) {
+            // top -> right
+            if (imgRobot.getRotation() == 0) {
+                imgRobot.setRotation(180);
+                imgRobot.setY(imgRobot.getY() + dpToPixels(25));
+            }
+
+            // bottom -> left
+            else {
+                imgRobot.setRotation(0);
+                imgRobot.setX(imgRobot.getX() - dpToPixels(25));
+            }
+
+            robotDrawable = R.drawable.ic_robot_left;
+            imgRobot.setImageResource(robotDrawable);
+            imgRobot.getLayoutParams().height = dpToPixels(25);
+            imgRobot.getLayoutParams().width = dpToPixels(50);
+
+        }
+
+        else if (robotDrawable == R.drawable.ic_robot_left) {
+            // left -> top
+            if (imgRobot.getRotation() == 0) {
+                imgRobot.setX(imgRobot.getX() + dpToPixels(25));
+                imgRobot.setY(imgRobot.getY() - dpToPixels(25));
+            }
+
+            // right -> bottom
+            else {
+                imgRobot.setRotation(180);
+            }
+
+            robotDrawable = R.drawable.ic_robot_top;
+            imgRobot.setImageResource(robotDrawable);
+            imgRobot.getLayoutParams().height = dpToPixels(50);
+            imgRobot.getLayoutParams().width = dpToPixels(25);
+        }
     }
 
 
@@ -361,7 +431,7 @@ public class MainActivity extends AppCompatActivity {
                 );
 
                 // shadow will just be the button itself
-                View.DragShadowBuilder shadow = new Arena.MyDragShadowBuilder(btn);
+                View.DragShadowBuilder shadow = new MyDragShadowBuilder(btn);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
                     view.startDragAndDrop(dragData, shadow, btn, 0);
@@ -409,6 +479,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         obstacles.clear();
+        imgRobot.setVisibility(View.GONE);
     }
 
     public void onBtnConnectClick(View view) {
