@@ -123,11 +123,11 @@
 
             <ImageView
                 android:id="@+id/imgRobot"
-                android:layout_width="25dp"
-                android:layout_height="50dp"
+                android:layout_width="75dp"
+                android:layout_height="75dp"
                 android:contentDescription="@string/img_robot_description"
-                android:visibility="gone"
                 android:elevation="2dp"
+                android:visibility="gone"
                 tools:ignore="ImageContrastCheck" />
 
         </LinearLayout>

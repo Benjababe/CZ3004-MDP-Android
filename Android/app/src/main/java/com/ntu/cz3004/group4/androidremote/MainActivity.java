@@ -59,7 +59,7 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity implements BluetoothListener {
     // 20x20 map variables
     int x, y, btnH, btnW, drawn = 0;
-    int robotDrawable;
+    int robotDrawable, robotRotation = 0;
 
     final String btAlert = "Connect via bluetooth before tampering with the map";
 
@@ -106,6 +106,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         imgRobot = findViewById(R.id.imgRobot);
         mapTable = findViewById(R.id.mapTable);
         spawnGroup = findViewById(R.id.spawnGroup);
+
+        robotDrawable = R.drawable.img_robot;
     }
 
     private void initBT() {
@@ -179,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         btnBG = AppCompatResources.getDrawable(this, R.drawable.btn_background);
 
         // 20x20 map
-        for (y = 0; y < 20; y++) {
+        for (y = 19; y >= 0; y--) {
             TableRow row = new TableRow(this);
             row.setHorizontalGravity(Gravity.CENTER_HORIZONTAL);
 
@@ -271,60 +273,26 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         int[] pt = new int[2];
         btn.getLocationInWindow(pt);
 
-        robotDrawable = R.drawable.ic_robot_top;
-
         imgRobot.setVisibility(View.VISIBLE);
-        imgRobot.setImageResource(R.drawable.ic_robot_top);
-        imgRobot.setX(btn.getX());
-        imgRobot.setY(pt[1] - dpToPixels(24));
+        imgRobot.setImageResource(robotDrawable);
 
-        imgRobot.setOnClickListener(view -> rotateRobot());
+        // set robot drawing position to bottom left instead of top left
+        imgRobot.setX(btn.getX());
+        imgRobot.setY(pt[1] - dpToPixels(24) - dpToPixels(50));
+
+        // rotates 90 degrees clockwise on click
+        imgRobot.setOnClickListener(robot -> {
+            robot.setPivotX(robot.getWidth() / 2);
+            robot.setPivotY(robot.getHeight() / 2);
+
+            robotRotation = (robotRotation + 90) % 360;
+            robot.setRotation(robotRotation);
+        });
     }
 
 
     private int dpToPixels(int dp) {
         return (int) (dp * getResources().getDisplayMetrics().density);
-    }
-
-
-    private void rotateRobot() {
-        if (robotDrawable == R.drawable.ic_robot_top) {
-            // top -> right
-            if (imgRobot.getRotation() == 0) {
-                imgRobot.setRotation(180);
-                imgRobot.setY(imgRobot.getY() + dpToPixels(25));
-            }
-
-            // bottom -> left
-            else {
-                imgRobot.setRotation(0);
-                imgRobot.setX(imgRobot.getX() - dpToPixels(25));
-            }
-
-            robotDrawable = R.drawable.ic_robot_left;
-            imgRobot.setImageResource(robotDrawable);
-            imgRobot.getLayoutParams().height = dpToPixels(25);
-            imgRobot.getLayoutParams().width = dpToPixels(50);
-
-        }
-
-        else if (robotDrawable == R.drawable.ic_robot_left) {
-            // left -> top
-            if (imgRobot.getRotation() == 0) {
-                imgRobot.setX(imgRobot.getX() + dpToPixels(25));
-                imgRobot.setY(imgRobot.getY() - dpToPixels(25));
-            }
-
-            // right -> bottom
-            else {
-                imgRobot.setRotation(180);
-            }
-
-            robotDrawable = R.drawable.ic_robot_top;
-            imgRobot.setImageResource(robotDrawable);
-            imgRobot.getLayoutParams().height = dpToPixels(50);
-            imgRobot.getLayoutParams().width = dpToPixels(25);
-        }
     }
 
 
