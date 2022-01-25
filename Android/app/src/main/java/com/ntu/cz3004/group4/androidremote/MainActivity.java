@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 
 import android.Manifest;
@@ -20,10 +21,14 @@ import android.bluetooth.BluetoothDevice;
 import android.content.ClipData;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.DragEvent;
@@ -40,6 +45,7 @@ import android.widget.Toast;
 
 import com.ntu.cz3004.group4.androidremote.arena.ArenaButton;
 import com.ntu.cz3004.group4.androidremote.arena.MyDragShadowBuilder;
+import com.ntu.cz3004.group4.androidremote.arena.ObstacleImages;
 import com.ntu.cz3004.group4.androidremote.arena.ObstacleInfo;
 import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothDevicesActivity;
 import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothListener;
@@ -52,7 +58,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @SuppressWarnings({"ConstantConditions"})
@@ -63,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
 
     final String btAlert = "Connect via bluetooth before tampering with the map";
 
+    // obstacleID: obstacleInfo obj
     HashMap<Integer, ObstacleInfo> obstacles = new HashMap<>();
     Drawable btnBG = null;
 
@@ -74,8 +84,11 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
     Button btnConnect;
     TextView txtConsole;
     ImageView imgRobot;
+    ImageView imgRecog;
     TableLayout mapTable;
     RadioGroup spawnGroup;
+
+    Pattern msgPattern;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +117,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         btnConnect = findViewById(R.id.btnConnect);
         txtConsole = findViewById(R.id.txtConsole);
         imgRobot = findViewById(R.id.imgRobot);
+        imgRecog = findViewById(R.id.imgRecog);
         mapTable = findViewById(R.id.mapTable);
         spawnGroup = findViewById(R.id.spawnGroup);
 
@@ -111,14 +125,55 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
     }
 
     private void initBT() {
-        bluetoothService = new BluetoothService(fragmentConsole.getHandler());
+        bluetoothService = new BluetoothService(btMsgHandler);
         fragmentConsole.setBluetoothService(bluetoothService);
 
         // passes onBluetoothStatusChange defined here into BluetoothService so it can manipulate views
         bluetoothService.setBluetoothStatusChange(this);
 
+        // message regex for image recognition
+        String regex = "imgrec\\s+(\\d+)\\s+(\\w+)";
+        msgPattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
+
         promptBTPermissions();
         listenBTFragment();
+    }
+
+    private final Handler btMsgHandler = new Handler(Looper.myLooper(), message -> {
+        switch (message.what) {
+            case Constants.MESSAGE_READ:
+                byte[] readBuf = (byte[]) message.obj;
+                String strMessage = new String(readBuf, 0, message.arg1);
+                Matcher m = msgPattern.matcher(strMessage);
+
+                if (m.matches())
+                    drawObstacleImg(m);
+            break;
+        }
+        return false;
+    });
+
+    private void drawObstacleImg(Matcher m) {
+        // retrieve values from bluetooth message
+        int obstacleID = Integer.parseInt(m.group(1).trim());
+        String imgName = m.group(2).toLowerCase(Locale.ROOT).trim();
+
+        // gets image to be drawn
+        Drawable imgDrawable = getImgDrawable(imgName);
+
+        // gets corresponding obstacle
+        ObstacleInfo obsInfo = obstacles.get(obstacleID);
+
+        // draws recognised image onto obstacle block
+        ArenaButton btn = findViewById(obsInfo.btnID);
+        btn.setBackground(imgDrawable);
+        btn.setText("");
+    }
+
+    // gets drawable object of recognised image to draw onto arena cell
+    private Drawable getImgDrawable(String imgName) {
+        int drawableID = ObstacleImages.getDrawableID(imgName);
+        return AppCompatResources.getDrawable(this, drawableID);
     }
 
     private void promptBTPermissions() {
@@ -203,7 +258,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
 
     // returns specified cell to regular state
     private void emptyCell(ArenaButton btn, Drawable background) {
-        int obstacleID = Integer.parseInt(btn.getText().toString());
+        int obstacleID = btn.obstacleID;
 
         // updates robot on obstacle removal
         ObstacleInfo obstacleInfo = obstacles.get(obstacleID);
@@ -211,6 +266,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
 
         obstacles.remove(obstacleID);
         btn.setText("");
+        btn.obstacleID = -1;
         btn.setBackground(background);
     }
 
@@ -387,6 +443,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         // add obstacle id to cell
         ArenaButton btn = findViewById(btnID);
         btn.setText(String.valueOf(obstacleID));
+        btn.obstacleID = obstacleID;
 
         // keeps track of obstacle in memory
         ObstacleInfo obstacleInfo = new ObstacleInfo(obstacleID, btnID, btn.x, btn.y, dirSelected);
@@ -457,6 +514,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
             ArenaButton btn = findViewById(btnID);
 
             btn.setText("");
+            btn.obstacleID = -1;
             btn.setBackground(btnBG);
             btn.setOnLongClickListener(null);
 

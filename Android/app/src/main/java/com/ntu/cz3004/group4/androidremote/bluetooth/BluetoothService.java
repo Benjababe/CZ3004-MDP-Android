@@ -1,5 +1,7 @@
 package com.ntu.cz3004.group4.androidremote.bluetooth;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
 
+@SuppressLint("MissingPermission")
 public class BluetoothService {
     private static final String TAG = "BluetoothService";
 
@@ -50,6 +53,10 @@ public class BluetoothService {
 
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         this.state = STATE_NONE;
+    }
+
+    private boolean checkPermission() {
+        return false;
     }
 
     public void setBluetoothStatusChange(BluetoothListener btListener) {
@@ -102,6 +109,7 @@ public class BluetoothService {
         // update UI
         updateBTConnected(STATE_CONNECTING);
     }
+
 
     public synchronized void connected(BluetoothSocket bluetoothSocket, BluetoothDevice bluetoothDevice) {
         if (connectedThread != null) {

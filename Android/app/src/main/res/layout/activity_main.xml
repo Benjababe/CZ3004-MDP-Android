@@ -22,7 +22,8 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.25"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingLeft="10dp">
 
             <TextView
                 android:id="@+id/txtRoboStatus"
@@ -52,6 +53,7 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="15dp"
                 android:contentDescription="@string/img_recog_description"
+                android:visibility="invisible"
                 app:srcCompat="@android:drawable/ic_menu_view"
                 tools:ignore="ImageContrastCheck" />
 
@@ -59,7 +61,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="@string/img_recog_subtitle" />
+                android:text="@string/img_recog_subtitle"
+                android:visibility="invisible" />
 
             <TextView
                 android:id="@+id/txtConsole"
@@ -224,6 +227,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true"
                     android:layout_marginBottom="70dp"
                     android:orientation="horizontal">
 

@@ -20,6 +20,8 @@ import androidx.fragment.app.Fragment;
 
 import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService;
 
+import java.util.Map;
+
 
 public class ConsoleFragment extends Fragment {
 
