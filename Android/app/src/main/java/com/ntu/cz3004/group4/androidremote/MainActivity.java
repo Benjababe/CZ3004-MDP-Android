@@ -3,7 +3,6 @@ package com.ntu.cz3004.group4.androidremote;
 import static android.view.DragEvent.ACTION_DRAG_ENTERED;
 import static android.view.DragEvent.ACTION_DRAG_EXITED;
 import static android.view.DragEvent.ACTION_DROP;
-
 import static com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService.STATE_CONNECTED;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -43,6 +42,13 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.fragment.app.FragmentManager;
+
 import com.ntu.cz3004.group4.androidremote.arena.ArenaButton;
 import com.ntu.cz3004.group4.androidremote.arena.MyDragShadowBuilder;
 import com.ntu.cz3004.group4.androidremote.arena.ObstacleImages;
@@ -69,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
     // 20x20 map variables
     int x, y, btnH, btnW, drawn = 0;
     int robotDrawable, robotRotation = 0;
-
+    int REQUEST_ENABLE_BT = 0;
     final String btAlert = "Connect via bluetooth before tampering with the map";
 
     // obstacleID: obstacleInfo obj
@@ -79,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
     private ActivityResultLauncher<Intent> activityLauncher;
 
     BluetoothService bluetoothService;
-
+    BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     ConsoleFragment fragmentConsole;
     Button btnConnect;
     TextView txtConsole;
@@ -135,9 +141,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         String regex = "imgrec\\s+(\\d+)\\s+(\\w+)";
         msgPattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
 
-        promptBTPermissions();
         listenBTFragment();
-    }
+        promptBTPermissions();
 
     private final Handler btMsgHandler = new Handler(Looper.myLooper(), message -> {
         switch (message.what) {
@@ -176,19 +181,34 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         return AppCompatResources.getDrawable(this, drawableID);
     }
 
+    }
     private void promptBTPermissions() {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         // permissions to handle bluetooth
         if (checkSelfPermission(Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED) {
+            if(bluetoothAdapter.isEnabled())
+            {
+                Intent intent = new Intent(MainActivity.this, BluetoothDevicesActivity.class);
+                bluetoothService.start();
+//                activityLauncher.launch(intent);
+            } else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder
+                        .setMessage("This app requires Bluetooth to connect to the robot")
+                        .setTitle("Alert");
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
             btnConnect.setEnabled(true);
-        } else if (shouldShowRequestPermissionRationale(Manifest.permission.BLUETOOTH)) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            builder
-                    .setMessage("This app requires Bluetooth to connect to the robot")
-                    .setTitle("Alert");
-
-            AlertDialog dialog = builder.create();
-            dialog.show();
-
+        } else if (shouldShowRequestPermissionRationale(Manifest.permission.BLUETOOTH)||!bluetoothAdapter.isEnabled()){
+//            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+//            builder
+//                    .setMessage("This app requires Bluetooth to connect to the robot")
+//                    .setTitle("Alert");
+//
+//            AlertDialog dialog = builder.create();
+//            dialog.show();
             btnConnect.setEnabled(false);
         }
     }
@@ -217,8 +237,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
 
     // adopted from BluetoothListener interface, used in BluetoothService class
     public void onBluetoothStatusChange(int status) {
-        ArrayList<String> text = new ArrayList<>(Arrays.asList("Not Connected", "", "Connecting", "Connected"));
-        ArrayList<String> col = new ArrayList<>(Arrays.asList("#FFFF0000", "", "#FFFFFF00", "#FF00FF00"));
+        ArrayList<String> text = new ArrayList<>(Arrays.asList("Not Connected", "", "Connecting", "Connected","Unavailable"));
+        ArrayList<String> col = new ArrayList<>(Arrays.asList("#FFFF0000", "", "#FFFFFF00", "#FF00FF00","#808080"));
 
         runOnUiThread(() -> {
             btnConnect.setText(text.get(status));
@@ -530,6 +550,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         Intent intent = new Intent(MainActivity.this, BluetoothDevicesActivity.class);
         bluetoothService.start();
         activityLauncher.launch(intent);
+
     }
 
     public void onBtnAccelClick(View view) {
