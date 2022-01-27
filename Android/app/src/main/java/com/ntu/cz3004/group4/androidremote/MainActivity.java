@@ -37,10 +37,12 @@ import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Switch;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -81,7 +83,10 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
 
     private ActivityResultLauncher<Intent> activityLauncher;
 
+    BluetoothAdapter adapter;
     BluetoothService bluetoothService;
+    BluetoothDevice robotDev;
+    String robotMACAddr = "";
 
     ConsoleFragment fragmentConsole;
     Button btnConnect;
@@ -90,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
     ImageView imgRecog;
     TableLayout mapTable;
     RadioGroup spawnGroup;
+    Switch switchTiltControl;
 
     Pattern msgPattern;
 
@@ -127,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         imgRecog = findViewById(R.id.imgRecog);
         mapTable = findViewById(R.id.mapTable);
         spawnGroup = findViewById(R.id.spawnGroup);
+        switchTiltControl = findViewById(R.id.switchTiltControl);
 
         robotDrawable = R.drawable.img_robot;
 
@@ -135,6 +142,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
     }
 
     private void initBT() {
+        adapter = BluetoothAdapter.getDefaultAdapter();
         bluetoothService = new BluetoothService(btMsgHandler);
         fragmentConsole.setBluetoothService(bluetoothService);
 
@@ -157,11 +165,14 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
 
     @Override
     public void onSensorChanged(SensorEvent e) {
+        if (!switchTiltControl.isChecked())
+            return;
+
         // tilt left
         if (e.values[0] > 3)
             onBtnSteerLeftClick(null);
 
-        // tilt
+        // tilt right
         if (e.values[0] < -3)
             onBtnSteerRightClick(null);
 
@@ -236,12 +247,11 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
                 // retrieves data sent from closed BT intent
                 Intent intent = result.getData();
                 Bundle intentBundle = intent.getExtras();
-                String address = intentBundle.getString("bluetooth_address");
 
                 // connects with the selected device from BT intent
-                BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-                BluetoothDevice device = adapter.getRemoteDevice(address);
-                bluetoothService.connect(device);
+                robotMACAddr = intentBundle.getString("bluetooth_address");
+                robotDev = adapter.getRemoteDevice(robotMACAddr);
+                bluetoothService.connect(robotDev);
 
                 // updates UI on connection
                 if (bluetoothService.state == STATE_CONNECTED) {
@@ -251,6 +261,21 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
             }
         });
     }
+
+    Handler reconnectHandler = new Handler();
+
+    Runnable reconnectRunnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                if (bluetoothService.state == STATE_CONNECTED)
+                    reconnectHandler.removeCallbacks(reconnectRunnable);
+                bluetoothService.connect(robotDev);
+            } catch (Exception e) {
+                Toast.makeText(MainActivity.this, "Failed to reconnect, trying in 5 second", Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
 
     // adopted from BluetoothListener interface, used in BluetoothService class
     public void onBluetoothStatusChange(int status) {
@@ -262,6 +287,9 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
             btnConnect.setTextColor(Color.parseColor(col.get(status)));
         });
 
+        if (bluetoothService.state == BluetoothService.STATE_NONE) {
+            reconnectHandler.postDelayed(reconnectRunnable, 5000);
+        }
     }
 
     private void initMap(TableLayout mapTable) {
@@ -605,6 +633,12 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
     public void onBtnSteerRightClick(View view) {
         if (bluetoothService.state == STATE_CONNECTED)
             bluetoothService.write("sr".getBytes(StandardCharsets.UTF_8));
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        bluetoothService.stop();
     }
 }
 

@@ -80,9 +80,6 @@ public class BluetoothService {
             acceptThread = new AcceptThread();
             acceptThread.start();
         }
-
-        // update UI
-        updateBTConnected(STATE_NONE);
     }
 
     public synchronized void connect(BluetoothDevice device) {
@@ -105,6 +102,8 @@ public class BluetoothService {
 
         connectThread = new ConnectThread(device);
         connectThread.start();
+
+        state = STATE_CONNECTING;
 
         // update UI
         updateBTConnected(STATE_CONNECTING);
@@ -130,6 +129,8 @@ public class BluetoothService {
         bundle.putString(Constants.DEVICE_NAME, bluetoothDevice.getName());
         message.setData(bundle);
         handler.sendMessage(message);
+
+        state = STATE_CONNECTED;
 
         //update UI
         updateBTConnected(STATE_CONNECTED);
@@ -190,7 +191,8 @@ public class BluetoothService {
     public void write(byte[] out) {
         ConnectedThread r;
         synchronized (this) {
-            if (state != STATE_CONNECTED) return;
+            if (state != STATE_CONNECTED)
+                return;
             r = connectedThread;
         }
         // Perform the write unsynchronized
