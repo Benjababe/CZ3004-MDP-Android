@@ -11,7 +11,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 
 import android.Manifest;
@@ -21,10 +20,13 @@ import android.bluetooth.BluetoothDevice;
 import android.content.ClipData;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorListener;
+import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,6 +38,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TableLayout;
@@ -65,7 +68,7 @@ import java.util.regex.Pattern;
 
 
 @SuppressWarnings({"ConstantConditions"})
-public class MainActivity extends AppCompatActivity implements BluetoothListener {
+public class MainActivity extends AppCompatActivity implements BluetoothListener, SensorEventListener {
     // 20x20 map variables
     int x, y, btnH, btnW, drawn = 0;
     int robotDrawable, robotRotation = 0;
@@ -90,6 +93,9 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
 
     Pattern msgPattern;
 
+    SensorManager sensorManager;
+    Sensor accel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
 
         initViews();
         initBT();
+        initMotionControl();
 
         // draws a 20x20 map for robot traversal when first rendered
         mapTable.getViewTreeObserver().addOnPreDrawListener(() -> {
@@ -122,6 +129,9 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         spawnGroup = findViewById(R.id.spawnGroup);
 
         robotDrawable = R.drawable.img_robot;
+
+        LinearLayout mainLayout = findViewById(R.id.main_layout);
+        mainLayout.setOnDragListener(new OutOfBoundsDragListener());
     }
 
     private void initBT() {
@@ -139,16 +149,43 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         listenBTFragment();
     }
 
-    private final Handler btMsgHandler = new Handler(Looper.myLooper(), message -> {
-        switch (message.what) {
-            case Constants.MESSAGE_READ:
-                byte[] readBuf = (byte[]) message.obj;
-                String strMessage = new String(readBuf, 0, message.arg1);
-                Matcher m = msgPattern.matcher(strMessage);
+    private void initMotionControl() {
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        accel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(this, accel, SensorManager.SENSOR_DELAY_NORMAL);
+    }
 
-                if (m.matches())
-                    drawObstacleImg(m);
-            break;
+    @Override
+    public void onSensorChanged(SensorEvent e) {
+        // tilt left
+        if (e.values[0] > 3)
+            onBtnSteerLeftClick(null);
+
+        // tilt
+        if (e.values[0] < -3)
+            onBtnSteerRightClick(null);
+
+        // tilt forward
+        if (e.values[1] < -3)
+            onBtnAccelClick(null);
+
+        // tilt backwards
+        if (e.values[1] > 3)
+            onBtnReverseClick(null);
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+    }
+
+    private final Handler btMsgHandler = new Handler(Looper.myLooper(), message -> {
+        if (message.what == Constants.MESSAGE_READ) {
+            byte[] readBuf = (byte[]) message.obj;
+            String strMessage = new String(readBuf, 0, message.arg1);
+            Matcher m = msgPattern.matcher(strMessage);
+
+            if (m.matches())
+                drawObstacleImg(m);
         }
         return false;
     });
@@ -349,6 +386,24 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
 
     private int dpToPixels(int dp) {
         return (int) (dp * getResources().getDisplayMetrics().density);
+    }
+
+
+    private class OutOfBoundsDragListener implements View.OnDragListener {
+        @Override
+        public boolean onDrag(View view, DragEvent e) {
+            switch (e.getAction()) {
+                case ACTION_DRAG_ENTERED:
+                case ACTION_DRAG_EXITED:
+                    return true;
+
+                case ACTION_DROP:
+                    ArenaButton originalBtn = (ArenaButton) e.getLocalState();
+                    emptyCell(originalBtn, btnBG);
+                    return true;
+            }
+            return true;
+        }
     }
 
 
