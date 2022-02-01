@@ -14,6 +14,7 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.FragmentManager;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -25,7 +26,6 @@ import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.hardware.SensorListener;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -37,7 +37,6 @@ import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -69,7 +68,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-@SuppressWarnings({"ConstantConditions"})
+@SuppressWarnings({"ConstantConditions", "IntegerDivisionInFloatingPointContext"})
 public class MainActivity extends AppCompatActivity implements BluetoothListener, SensorEventListener {
     // 20x20 map variables
     int x, y, btnH, btnW, drawn = 0;
@@ -95,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
     ImageView imgRecog;
     TableLayout mapTable;
     RadioGroup spawnGroup;
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
     Switch switchTiltControl;
 
     Pattern msgPattern;
@@ -417,6 +417,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
     }
 
 
+    // for drag events to anything outside the grid
+    // remove the dragged item
     private class OutOfBoundsDragListener implements View.OnDragListener {
         @Override
         public boolean onDrag(View view, DragEvent e) {
