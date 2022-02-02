@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.FragmentManager;
 
 import android.Manifest;
@@ -19,6 +20,7 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.ClipData;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -35,6 +37,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.DragEvent;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -47,6 +50,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.ntu.cz3004.group4.androidremote.arena.ArenaButton;
 import com.ntu.cz3004.group4.androidremote.arena.MyDragShadowBuilder;
 import com.ntu.cz3004.group4.androidremote.arena.ObstacleImages;
@@ -95,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
     TableLayout mapTable;
     RadioGroup spawnGroup;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
-    Switch switchTiltControl;
+    SwitchCompat switchTiltControl;
 
     Pattern msgPattern;
 
@@ -262,8 +266,10 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         });
     }
 
+    // handles the runnable for reconnecting to bluetooth device
     Handler reconnectHandler = new Handler();
 
+    // runnable that runs code to reconnect to bluetooth device
     Runnable reconnectRunnable = new Runnable() {
         @Override
         public void run() {
@@ -277,6 +283,15 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         }
     };
 
+
+    // prompt user whether to reconnect to bluetooth device
+    private void promptReconnect() {
+        new AlertDialog.Builder(this).setTitle("Reconnect to Bluetooth Device")
+        .setPositiveButton("Yes", (dialogInterface, i) -> reconnectHandler.postDelayed(reconnectRunnable, 2000))
+        .setNegativeButton("No", null)
+        .show();
+    }
+
     // adopted from BluetoothListener interface, used in BluetoothService class
     public void onBluetoothStatusChange(int status) {
         ArrayList<String> text = new ArrayList<>(Arrays.asList("Not Connected", "", "Connecting", "Connected"));
@@ -285,11 +300,11 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         runOnUiThread(() -> {
             btnConnect.setText(text.get(status));
             btnConnect.setTextColor(Color.parseColor(col.get(status)));
-        });
 
-        if (bluetoothService.state == BluetoothService.STATE_NONE) {
-            reconnectHandler.postDelayed(reconnectRunnable, 5000);
-        }
+            if (bluetoothService.state == BluetoothService.STATE_NONE) {
+                promptReconnect();
+            }
+        });
     }
 
     private void initMap(TableLayout mapTable) {
@@ -635,6 +650,16 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
     public void onBtnSteerRightClick(View view) {
         if (bluetoothService.state == STATE_CONNECTED)
             bluetoothService.write("sr".getBytes(StandardCharsets.UTF_8));
+    }
+
+    public void onImageRecogClick(View view) {
+        if (bluetoothService.state == STATE_CONNECTED)
+            bluetoothService.write("img_recog".getBytes(StandardCharsets.UTF_8));
+    }
+
+    public void onFastestPathClick(View view) {
+        if (bluetoothService.state == STATE_CONNECTED)
+            bluetoothService.write("fastest_path".getBytes(StandardCharsets.UTF_8));
     }
 
     @Override

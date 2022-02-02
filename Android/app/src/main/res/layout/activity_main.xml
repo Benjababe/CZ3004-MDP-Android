@@ -147,12 +147,14 @@
                 android:id="@+id/btnImageRecog"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:onClick="onImageRecogClick"
                 android:text="@string/image_recog" />
 
             <Button
                 android:id="@+id/btnFastestPath"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:onClick="onFastestPathClick"
                 android:text="@string/fastest_path" />
 
             <Button
@@ -229,7 +231,7 @@
 
                     </RadioGroup>
 
-                    <Switch
+                    <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/switchTiltControl"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
