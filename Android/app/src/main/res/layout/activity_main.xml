@@ -111,27 +111,20 @@
             android:layout_weight="0.55"
             android:orientation="vertical">
 
-            <TableLayout
-                android:id="@+id/mapTable"
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/fragmentMap"
+                android:name="com.ntu.cz3004.group4.androidremote.fragments.MapFragment"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:background="@drawable/border"/>
 
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/fragmentConsole"
-                android:name="com.ntu.cz3004.group4.androidremote.ConsoleFragment"
+                android:name="com.ntu.cz3004.group4.androidremote.fragments.ConsoleFragment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/border"
                 android:visibility="gone" />
-
-            <ImageView
-                android:id="@+id/imgRobot"
-                android:layout_width="75dp"
-                android:layout_height="75dp"
-                android:contentDescription="@string/img_robot_description"
-                android:elevation="2dp"
-                android:visibility="gone"
-                tools:ignore="ImageContrastCheck" />
 
         </LinearLayout>
 
@@ -178,7 +171,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:onClick="Reset"
+                    android:onClick="onResetClick"
                     android:text="@string/reset"
                     android:textColor="#4DB6AC" />
 
