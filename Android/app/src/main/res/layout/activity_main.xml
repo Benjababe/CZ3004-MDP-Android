@@ -25,83 +25,14 @@
             android:orientation="vertical"
             android:paddingLeft="10dp">
 
-            <TextView
-                android:id="@+id/txtRoboStatus"
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/fragmentLeftCol"
+                android:name="com.ntu.cz3004.group4.androidremote.fragments.LeftColFragment"
                 android:layout_width="match_parent"
-                android:layout_height="36dp"
-                android:background="@drawable/border"
-                android:text="@string/robo_status" />
-
-            <TextView
-                android:id="@+id/txtRoboDirection"
-                android:layout_width="match_parent"
-                android:layout_height="36dp"
-                android:background="@drawable/border"
-                android:text="@string/robo_direction" />
-
-            <TextView
-                android:id="@+id/txtRoboPosition"
-                android:layout_width="match_parent"
-                android:layout_height="36dp"
-                android:background="@drawable/border"
-                android:text="@string/robo_position" />
-
-            <ImageView
-                android:id="@+id/imgRecog"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="15dp"
-                android:contentDescription="@string/img_recog_description"
-                android:visibility="invisible"
-                app:srcCompat="@android:drawable/ic_menu_view"
-                tools:ignore="ImageContrastCheck" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="@string/img_recog_subtitle"
-                android:visibility="invisible" />
-
-            <TextView
-                android:id="@+id/txtConsole"
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_marginTop="30dp"
-                android:background="@drawable/border"
-                android:text="@string/console" />
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <ImageButton
-                    android:id="@+id/btnAccel"
-                    android:layout_width="match_parent"
-                    android:layout_height="65dp"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginHorizontal="20dp"
-                    android:layout_marginBottom="100dp"
-                    android:contentDescription="@string/btn_accel_description"
-                    android:onClick="onBtnAccelClick"
-                    app:srcCompat="@android:drawable/arrow_up_float"
-                    tools:ignore="ImageContrastCheck" />
-
-                <ImageButton
-                    android:id="@+id/btnReverse"
-                    android:layout_width="match_parent"
-                    android:layout_height="65dp"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginHorizontal="20dp"
-                    android:layout_marginBottom="30dp"
-                    android:contentDescription="@string/btn_reverse_description"
-                    android:onClick="onBtnReverseClick"
-                    app:srcCompat="@android:drawable/arrow_down_float"
-                    tools:ignore="ImageContrastCheck" />
-            </RelativeLayout>
+                android:layout_height="match_parent"/>
 
         </LinearLayout>
+
 
         <LinearLayout
             android:id="@+id/grid_center"
@@ -115,8 +46,7 @@
                 android:id="@+id/fragmentMap"
                 android:name="com.ntu.cz3004.group4.androidremote.fragments.MapFragment"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/border"/>
+                android:layout_height="wrap_content"/>
 
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/fragmentConsole"
@@ -136,135 +66,12 @@
             android:layout_weight="0.2"
             android:orientation="vertical">
 
-            <Button
-                android:id="@+id/btnImageRecog"
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/fragmentRightCol"
+                android:name="com.ntu.cz3004.group4.androidremote.fragments.RightColFragment"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:onClick="onImageRecogClick"
-                android:text="@string/image_recog" />
-
-            <Button
-                android:id="@+id/btnFastestPath"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:onClick="onFastestPathClick"
-                android:text="@string/fastest_path" />
-
-            <Button
-                android:id="@+id/btnConnect"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:onClick="onBtnConnectClick"
-                android:text="@string/connect"
-                android:textColor="@color/btn_connect_red"
-                tools:ignore="TextContrastCheck" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/btnReset"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="onResetClick"
-                    android:text="@string/reset"
-                    android:textColor="#4DB6AC" />
-
-                <Button
-                    android:id="@+id/btnTemp"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_weight="1"
-                    android:text="@string/temp"
-                    android:textColor="#4DB6AC" />
-            </LinearLayout>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-                    <RadioGroup
-                        android:id="@+id/spawnGroup"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="15dp"
-                        android:checkedButton="@id/btnObstacle">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/title_spawn" />
-
-                        <RadioButton
-                            android:id="@+id/btnRobot"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:minHeight="48dp"
-                            android:text="@string/btn_robot" />
-
-                        <RadioButton
-                            android:id="@+id/btnObstacle"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:minHeight="48dp"
-                            android:text="@string/btn_obstacle" />
-
-                    </RadioGroup>
-
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/switchTiltControl"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        android:paddingRight="15dp"
-                        android:text="@string/switch_tilt_control" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginBottom="70dp"
-                    android:orientation="horizontal">
-
-                    <ImageButton
-                        android:id="@+id/btnSteerLeft"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:contentDescription="@string/btn_left_description"
-                        android:onClick="onBtnSteerLeftClick"
-                        app:srcCompat="@drawable/ic_arrow_left"
-                        tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
-
-                    <ImageButton
-                        android:id="@+id/btnSteerRight"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:contentDescription="@string/btn_right_description"
-                        android:onClick="onBtnSteerRightClick"
-                        app:srcCompat="@drawable/ic_arrow_right"
-                        tools:ignore="TouchTargetSizeCheck,ImageContrastCheck" />
-                </LinearLayout>
-
-            </RelativeLayout>
-
+                android:layout_height="match_parent" />
         </LinearLayout>
+
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

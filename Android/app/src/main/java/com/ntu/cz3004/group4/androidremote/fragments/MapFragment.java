@@ -43,7 +43,7 @@ import java.util.Set;
 public class MapFragment extends Fragment {
     // 20x20 map variables
     int x, y, btnH, btnW, drawn = 0;
-    int robotDrawable, robotRotation = 0;
+    int robotRotation = 0;
 
     // obstacleID: obstacleInfo obj
     HashMap<Integer, ObstacleInfo> obstacles = new HashMap<>();

@@ -6,7 +6,6 @@ import static android.view.DragEvent.ACTION_DROP;
 import static com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService.STATE_CONNECTED;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -23,11 +22,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.DragEvent;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -35,7 +30,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.FragmentManager;
 
 import com.ntu.cz3004.group4.androidremote.arena.ArenaButton;
@@ -45,7 +39,9 @@ import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothDevicesActivity;
 import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothListener;
 import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService;
 import com.ntu.cz3004.group4.androidremote.fragments.ConsoleFragment;
+import com.ntu.cz3004.group4.androidremote.fragments.LeftColFragment;
 import com.ntu.cz3004.group4.androidremote.fragments.MapFragment;
+import com.ntu.cz3004.group4.androidremote.fragments.RightColFragment;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -66,13 +62,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
 
     ConsoleFragment fragmentConsole;
     MapFragment fragmentMap;
-
-    Button btnConnect;
-    TextView txtConsole;
-    ImageView imgRecog;
-    RadioGroup spawnGroup;
-    @SuppressLint("UseSwitchCompatOrMaterialCode")
-    SwitchCompat switchTiltControl;
+    LeftColFragment fragmentLeftCol;
+    RightColFragment fragmentRightCol;
 
     Pattern msgPattern;
 
@@ -89,22 +80,22 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         initMotionControl();
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        fragmentMap.setSpawnGroup(fragmentRightCol.getSpawnGroup());
+    }
+
     // finds all used views in UI
     private void initViews() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentConsole = (ConsoleFragment) fragmentManager.findFragmentById(R.id.fragmentConsole);
         fragmentMap = (MapFragment) fragmentManager.findFragmentById(R.id.fragmentMap);
-
-        btnConnect = findViewById(R.id.btnConnect);
-        txtConsole = findViewById(R.id.txtConsole);
-        imgRecog = findViewById(R.id.imgRecog);
-        spawnGroup = findViewById(R.id.spawnGroup);
-        switchTiltControl = findViewById(R.id.switchTiltControl);
+        fragmentLeftCol = (LeftColFragment) fragmentManager.findFragmentById(R.id.fragmentLeftCol);
+        fragmentRightCol = (RightColFragment) fragmentManager.findFragmentById(R.id.fragmentRightCol);
 
         LinearLayout mainLayout = findViewById(R.id.main_layout);
         mainLayout.setOnDragListener(new OutOfBoundsDragListener());
-
-        fragmentMap.setSpawnGroup(spawnGroup);
     }
 
     private void initBT() {
@@ -112,6 +103,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         bluetoothService = new BluetoothService(btMsgHandler);
         fragmentConsole.setBluetoothService(bluetoothService);
         fragmentMap.setBluetoothService(bluetoothService);
+        fragmentLeftCol.setBluetoothService(bluetoothService);
+        fragmentRightCol.setBluetoothService(bluetoothService);
 
         // passes onBluetoothStatusChange defined here into BluetoothService so it can manipulate views
         bluetoothService.setBluetoothStatusChange(this);
@@ -132,24 +125,24 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
 
     @Override
     public void onSensorChanged(SensorEvent e) {
-        if (!switchTiltControl.isChecked())
+        if (!fragmentRightCol.getSwitchTiltControl().isChecked())
             return;
 
         // tilt left
         if (e.values[0] > 3)
-            onBtnSteerLeftClick(null);
+            fragmentRightCol.steerLeft(null);
 
         // tilt right
         if (e.values[0] < -3)
-            onBtnSteerRightClick(null);
+            fragmentRightCol.steerRight(null);
 
         // tilt forward
         if (e.values[1] < -3)
-            onBtnAccelClick(null);
+            fragmentLeftCol.accelerate(null);
 
         // tilt backwards
         if (e.values[1] > 3)
-            onBtnReverseClick(null);
+            fragmentLeftCol.reverse(null);
     }
 
     @Override
@@ -194,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
     private void promptBTPermissions() {
         // permissions to handle bluetooth
         if (checkSelfPermission(Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED) {
-            btnConnect.setEnabled(true);
+            fragmentRightCol.btEnabled = true;
         } else if (shouldShowRequestPermissionRationale(Manifest.permission.BLUETOOTH)) {
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder
@@ -204,7 +197,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
             AlertDialog dialog = builder.create();
             dialog.show();
 
-            btnConnect.setEnabled(false);
+            fragmentRightCol.btEnabled = false;
         }
     }
 
@@ -219,12 +212,6 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
                 robotMACAddr = intentBundle.getString("bluetooth_address");
                 robotDev = adapter.getRemoteDevice(robotMACAddr);
                 bluetoothService.connect(robotDev);
-
-                // updates UI on connection
-                if (bluetoothService.state == STATE_CONNECTED) {
-                    fragmentConsole.setBluetoothService(bluetoothService);
-                    fragmentMap.setBluetoothService(bluetoothService);
-                }
             }
         });
     }
@@ -261,8 +248,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         ArrayList<String> col = new ArrayList<>(Arrays.asList("#FFFF0000", "", "#FFFFFF00", "#FF00FF00"));
 
         runOnUiThread(() -> {
-            btnConnect.setText(text.get(status));
-            btnConnect.setTextColor(Color.parseColor(col.get(status)));
+            fragmentRightCol.getBtnConnect().setText(text.get(status));
+            fragmentRightCol.getBtnConnect().setTextColor(Color.parseColor(col.get(status)));
 
             if (bluetoothService.state == BluetoothService.STATE_NONE) {
                 promptReconnect();
@@ -292,43 +279,17 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
 
 
     public void onBtnConnectClick(View view) {
-        Intent intent = new Intent(MainActivity.this, BluetoothDevicesActivity.class);
-        bluetoothService.start();
-        activityLauncher.launch(intent);
-    }
-
-    public void onBtnAccelClick(View view) {
-        if (bluetoothService.state == STATE_CONNECTED)
-            bluetoothService.write("f".getBytes(StandardCharsets.UTF_8));
-    }
-
-    public void onBtnReverseClick(View view) {
-        if (bluetoothService.state == STATE_CONNECTED)
-            bluetoothService.write("r".getBytes(StandardCharsets.UTF_8));
-    }
-
-    public void onBtnSteerLeftClick(View view) {
-        if (bluetoothService.state == STATE_CONNECTED)
-            bluetoothService.write("sl".getBytes(StandardCharsets.UTF_8));
-    }
-
-    public void onBtnSteerRightClick(View view) {
-        if (bluetoothService.state == STATE_CONNECTED)
-            bluetoothService.write("sr".getBytes(StandardCharsets.UTF_8));
-    }
-
-    public void onImageRecogClick(View view) {
-        if (bluetoothService.state == STATE_CONNECTED)
-            bluetoothService.write("img_recog".getBytes(StandardCharsets.UTF_8));
-    }
-
-    public void onFastestPathClick(View view) {
-        if (bluetoothService.state == STATE_CONNECTED)
-            bluetoothService.write("fastest_path".getBytes(StandardCharsets.UTF_8));
+        if (fragmentRightCol.btEnabled) {
+            Intent intent = new Intent(MainActivity.this, BluetoothDevicesActivity.class);
+            bluetoothService.start();
+            activityLauncher.launch(intent);
+        }
     }
 
     public void onResetClick(View view) {
         fragmentMap.reset();
+        if (bluetoothService.state == STATE_CONNECTED)
+            bluetoothService.write("reset".getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
