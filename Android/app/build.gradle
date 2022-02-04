@@ -8,7 +8,7 @@ android {
     defaultConfig {
         applicationId "com.ntu.cz3004.group4.androidremote"
         minSdk 23
-        targetSdk 31
+        targetSdk 28
         versionCode 1
         versionName "1.0"
 
