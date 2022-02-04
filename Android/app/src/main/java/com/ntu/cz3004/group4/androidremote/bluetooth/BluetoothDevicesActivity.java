@@ -59,7 +59,7 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
         Button btnOnOff = findViewById(R.id.btnOnOff);
         Button btnDiscover = findViewById(R.id.btnDiscover);
         Button btnScan = findViewById(R.id.btnScan);
-        ListView lvScan = (ListView) findViewById(R.id.lvScan);
+        lvScan = (ListView) findViewById(R.id.lvScan);
         btnOnOff.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -179,7 +179,7 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 list2.add(device);
                 Log.d("Bluetooth Activity","Broadcast Receiver 3");
-                mDeviceListAdapter = new DeviceListAdapter(context, R.layout.item_bluetooth_device, list2);
+                mDeviceListAdapter = new DeviceListAdapter(context, R.layout.itemscan_bluetooth_device, list2);
                 lvScan.setAdapter(mDeviceListAdapter);
             }
         }
