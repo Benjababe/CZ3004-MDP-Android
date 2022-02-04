@@ -63,13 +63,13 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/btn_connect_device"
+            android:id="@+id/btn_pair_device"
             android:layout_width="171dp"
             android:layout_height="48dp"
             android:layout_marginTop="4dp"
             android:layout_marginRight="64dp"
             android:padding="8dp"
-            android:text="pair and connect"
+            android:text="Pair"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>

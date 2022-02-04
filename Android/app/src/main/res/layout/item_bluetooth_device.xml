@@ -63,7 +63,7 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/btn_connect_device"
+            android:id="@+id/btn_pair_device"
             android:layout_width="106dp"
             android:layout_height="48dp"
             android:layout_marginTop="20dp"
