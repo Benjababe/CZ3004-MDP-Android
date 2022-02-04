@@ -45,7 +45,7 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
     ListView lv_devices;
     ListView lvScan;
     BluetoothAdapter bluetoothAdapter;
-    boolean m1 = false;
+    boolean m1 = false, m3 = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +91,7 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
                 bluetoothAdapter.startDiscovery();
                 IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
                 registerReceiver(mBroadcastReceiver3, discoverDevicesIntent);
+                m3 = true;
             }
             if (!bluetoothAdapter.isDiscovering()) {
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
@@ -106,6 +107,7 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
                 bluetoothAdapter.startDiscovery();
                 IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
                 registerReceiver(mBroadcastReceiver3, discoverDevicesIntent);
+                m3 = true;
             }
 
 
@@ -171,7 +173,6 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
         }
     };
 
-
     //Broadcast Receiver for listing devices that are not yet paired Executed by btnScan() method.
     private BroadcastReceiver mBroadcastReceiver3 = new BroadcastReceiver() {
         @Override
@@ -179,7 +180,7 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
             final String action = intent.getAction();
             if (action.equals(BluetoothDevice.ACTION_FOUND)) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if (device.getName() != null && device.getName().length() > 0 && !list2.contains(device))
+                if (device.getName() != null && device.getName().length() > 0 && !list1.contains(device) && !list2.contains(device))
                     list2.add(device);
                 Log.d("Bluetooth Activity","Broadcast Receiver 3");
                 mDeviceListAdapter = new DeviceListAdapter(context, R.layout.item_scan_bluetooth_device, list2);
@@ -198,7 +199,14 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
                 BluetoothDevice mDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 if(mDevice.getBondState() == BluetoothDevice.BOND_BONDED){
                     Log.d(TAG, "BOND_BONDED.");
+                    list2.remove(mDevice);
+                    list1.add(mDevice);
 
+                    mDeviceListAdapter = new DeviceListAdapter(context, R.layout.item_scan_bluetooth_device, list2);
+                    lvScan.setAdapter(mDeviceListAdapter);
+
+                    devicesAdapter = new DeviceAdapter(BluetoothDevicesActivity.this, list1);
+                    devicesListView.setAdapter(devicesAdapter);
                 }
                 if(mDevice.getBondState() == BluetoothDevice.BOND_BONDING){
                     Log.d(TAG, "BOND_BONDING.");
@@ -215,7 +223,8 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
         super.onDestroy();
         if (m1)
             unregisterReceiver(mBroadcastReceiver1);
-        unregisterReceiver(mBroadcastReceiver3);
+        if (m3)
+            unregisterReceiver(mBroadcastReceiver3);
     }
 
     @Override
