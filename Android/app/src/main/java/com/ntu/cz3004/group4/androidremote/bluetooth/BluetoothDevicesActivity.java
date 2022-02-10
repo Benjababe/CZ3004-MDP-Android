@@ -185,6 +185,7 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
                 Log.d("Bluetooth Activity","Broadcast Receiver 3");
                 mDeviceListAdapter = new DeviceListAdapter(context, R.layout.item_scan_bluetooth_device, list2);
                 lvScan.setAdapter(mDeviceListAdapter);
+                lvScan.setSelection(mDeviceListAdapter.getCount()-1);
             }
         }
     };

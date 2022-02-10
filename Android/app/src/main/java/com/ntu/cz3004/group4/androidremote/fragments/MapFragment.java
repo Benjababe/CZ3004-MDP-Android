@@ -3,6 +3,10 @@ package com.ntu.cz3004.group4.androidremote.fragments;
 import static android.view.DragEvent.ACTION_DRAG_ENTERED;
 import static android.view.DragEvent.ACTION_DRAG_EXITED;
 import static android.view.DragEvent.ACTION_DROP;
+import static com.ntu.cz3004.group4.androidremote.Constants.EAST;
+import static com.ntu.cz3004.group4.androidremote.Constants.NORTH;
+import static com.ntu.cz3004.group4.androidremote.Constants.SOUTH;
+import static com.ntu.cz3004.group4.androidremote.Constants.WEST;
 import static com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService.STATE_CONNECTED;
 
 import android.content.ClipData;
@@ -20,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Switch;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.Toast;
@@ -44,7 +49,8 @@ public class MapFragment extends Fragment {
     // 20x20 map variables
     int x, y, btnH, btnW, drawn = 0;
     int robotRotation = 0;
-
+    int direction = NORTH;
+    int[][] coord = new int[20][20];
     // obstacleID: obstacleInfo obj
     HashMap<Integer, ObstacleInfo> obstacles = new HashMap<>();
     Drawable btnBG = null;
@@ -105,6 +111,8 @@ public class MapFragment extends Fragment {
                 btn.setBackground(btnBG);
                 btn.setLayoutParams(new TableRow.LayoutParams(btnW, btnH));
                 btn.setTextColor(Color.rgb(255, 0, 0));
+
+                coord[x][y] = btn.getId();
 
                 btn.setOnClickListener(new MapBtnClickListener(x, y, btn.getId()));
                 btn.setOnDragListener(new BtnDragListener(x, y, btn.getId()));
@@ -357,11 +365,7 @@ public class MapFragment extends Fragment {
 
         // rotates 90 degrees clockwise on click
         imgRobot.setOnClickListener(robot -> {
-            robot.setPivotX(robot.getWidth() / 2);
-            robot.setPivotY(robot.getHeight() / 2);
-
-            robotRotation = (robotRotation + 90) % 360;
-            robot.setRotation(robotRotation);
+            rotateRobot(robot,90);
         });
     }
 
@@ -406,4 +410,57 @@ public class MapFragment extends Fragment {
     public HashMap<Integer, ObstacleInfo> getObstacles() {
         return obstacles;
     }
+    public void rotateRobot(View v, int rotation)
+    {
+        if(v == null)
+        {
+            v = imgRobot;
+        }
+        if(rotation >0)
+        {
+            direction = (++direction)%4;
+        }
+        else if( rotation < 0)
+        {
+            if(direction == NORTH)
+            {
+                direction = WEST;
+            }
+            else
+            {
+                direction--;
+            }
+        }
+        v.setPivotX(v.getWidth() / 2);
+        v.setPivotY(v.getHeight() / 2);
+        robotRotation = (robotRotation + rotation) % 360;
+        v.setRotation(robotRotation);
+        Log.d("Check Direction", String.valueOf(direction));
+    }
+    public void moveRobot(boolean forward)
+    {
+        int multiplier = forward ? 1: -1;
+        switch(direction)
+        {
+            case NORTH:
+                imgRobot.setY(imgRobot.getY() -dpToPixels(26) * multiplier);
+                break;
+            case SOUTH:
+                imgRobot.setY(imgRobot.getY() + dpToPixels(26) * multiplier);
+                break;
+            case EAST:
+                imgRobot.setX(imgRobot.getX()+dpToPixels(26) * multiplier);
+                break;
+            case WEST:
+                imgRobot.setX(imgRobot.getX()-dpToPixels(26) * multiplier);
+                break;
+        }
+    }
+    public void setRobotXY(int x, int y)
+    {
+         int btnid = coord[x][y];
+         ArenaButton cellbtn = getView().findViewById(btnid);
+         spawnRobot(cellbtn);
+    }
+
 }
