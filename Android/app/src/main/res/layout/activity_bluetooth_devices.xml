@@ -55,7 +55,7 @@
 
         <ListView
             android:id="@+id/lv_devices"
-            android:layout_width="800dp"
+            android:layout_width="fill_parent"
             android:layout_height="180dp">
 
         </ListView>
@@ -70,7 +70,7 @@
 
         <ListView
             android:id="@+id/lvScan"
-            android:layout_width="800dp"
+            android:layout_width="fill_parent"
             android:layout_height="180dp"
             android:layout_marginTop="12dp" />
 

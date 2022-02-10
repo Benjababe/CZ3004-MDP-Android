@@ -80,6 +80,10 @@ public class BluetoothService {
             acceptThread = new AcceptThread();
             acceptThread.start();
         }
+
+        if (state == STATE_CONNECTED) {
+            stop();
+        }
     }
 
     public synchronized void connect(BluetoothDevice device) {
