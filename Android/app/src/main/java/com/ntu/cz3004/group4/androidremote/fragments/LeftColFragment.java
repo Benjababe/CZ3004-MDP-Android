@@ -84,6 +84,7 @@ public class LeftColFragment extends Fragment {
             }
     }
 
+
     public void setBluetoothService(BluetoothService bluetoothService) {
         this.bluetoothService = bluetoothService;
     }

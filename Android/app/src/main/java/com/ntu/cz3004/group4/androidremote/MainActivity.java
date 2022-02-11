@@ -110,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         fragmentLeftCol = (LeftColFragment) fragmentManager.findFragmentById(R.id.fragmentLeftCol);
         fragmentRightCol = (RightColFragment) fragmentManager.findFragmentById(R.id.fragmentRightCol);
 
+        fragmentMap.getLeftColFragment(fragmentLeftCol);
         LinearLayout mainLayout = findViewById(R.id.main_layout);
         mainLayout.setOnDragListener(new OutOfBoundsDragListener());
     }
@@ -183,18 +184,27 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         switch (objRPI.getInt("type"))
         {
             case MOVE_FORWARD:
+                fragmentLeftCol.setRoboStatus("MOVE FORWARD");
                 fragmentMap.moveRobot(true);
+                fragmentLeftCol.setRobotPosition(fragmentMap.getPosition());
                 break;
             case MOVE_BACKWARD:
+                fragmentLeftCol.setRoboStatus("MOVE BACKWARD");
                 fragmentMap.moveRobot(false);
+                fragmentLeftCol.setRobotPosition(fragmentMap.getPosition());
                 break;
             case TURN_LEFT:
+                fragmentLeftCol.setRoboStatus("TURN LEFT");
                 fragmentMap.rotateRobot(null,-90);
+                fragmentLeftCol.setRoboDirection(fragmentMap.getDirection());
                 break;
             case TURN_RIGHT:
+                fragmentLeftCol.setRoboStatus("TURN RIGHT");
                 fragmentMap.rotateRobot(null,90);
+                fragmentLeftCol.setRoboDirection(fragmentMap.getDirection());
                 break;
             case ADD_OBSTACLE:
+                fragmentLeftCol.setRoboStatus("ADD OBSTACLE");
                 x = val.getInt("X");
                 y = val.getInt("Y");
                 imageID = val.getInt("IMAGE_ID");
@@ -202,6 +212,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
                 drawObstacleImg(x, y, imageID);
                 break;
             case REMOVE_OBSTACLE:
+                fragmentLeftCol.setRoboStatus("REMOVE OBSTACLE");
                 imageID = val.getInt("IMAGE_ID");
                 fragmentMap.emptyCellObsID(imageID);
                 break;
@@ -209,6 +220,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
                 x = val.getInt("ROBOT_X");
                 y = val.getInt("ROBOT_Y");
                 fragmentMap.setRobotXY(x,y);
+                fragmentLeftCol.setRobotPosition(fragmentMap.getPosition());
                 break;
             case LOG:
                 String msg = val.getString("MESSAGE");
