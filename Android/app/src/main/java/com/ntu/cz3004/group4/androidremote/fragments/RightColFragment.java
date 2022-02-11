@@ -1,5 +1,10 @@
 package com.ntu.cz3004.group4.androidremote.fragments;
 
+import static com.ntu.cz3004.group4.androidremote.Constants.A_FASTEST_PATH;
+import static com.ntu.cz3004.group4.androidremote.Constants.A_IMG_REC;
+import static com.ntu.cz3004.group4.androidremote.Constants.A_MOVE_FORWARD;
+import static com.ntu.cz3004.group4.androidremote.Constants.A_MOVE_LEFT;
+import static com.ntu.cz3004.group4.androidremote.Constants.A_MOVE_RIGHT;
 import static com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService.STATE_CONNECTED;
 
 import android.os.Bundle;
@@ -15,6 +20,9 @@ import androidx.fragment.app.Fragment;
 
 import com.ntu.cz3004.group4.androidremote.R;
 import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService;
+import com.ntu.cz3004.group4.androidremote.bluetooth.Packet;
+
+import org.json.JSONException;
 
 import java.nio.charset.StandardCharsets;
 
@@ -56,24 +64,48 @@ public class RightColFragment extends Fragment {
 
 
     public void startImageRecog(View view) {
-        if (bluetoothService.state == STATE_CONNECTED)
-            bluetoothService.write("img_recog".getBytes(StandardCharsets.UTF_8));
+        if (bluetoothService.state == STATE_CONNECTED) {
+            try {
+                Packet packet = new Packet(A_IMG_REC);
+                bluetoothService.write(packet.getJSONString().getBytes(StandardCharsets.UTF_8));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void startFastestPath(View view) {
-        if (bluetoothService.state == STATE_CONNECTED)
-            bluetoothService.write("fastest_path".getBytes(StandardCharsets.UTF_8));
+        if (bluetoothService.state == STATE_CONNECTED) {
+            try {
+                Packet packet = new Packet(A_FASTEST_PATH);
+                bluetoothService.write(packet.getJSONString().getBytes(StandardCharsets.UTF_8));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 
     public void steerLeft(View view) {
-        if (bluetoothService.state == STATE_CONNECTED)
-            bluetoothService.write("sl".getBytes(StandardCharsets.UTF_8));
+        if (bluetoothService.state == STATE_CONNECTED) {
+            try {
+                Packet packet = new Packet(A_MOVE_LEFT);
+                bluetoothService.write(packet.getJSONString().getBytes(StandardCharsets.UTF_8));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void steerRight(View view) {
-        if (bluetoothService.state == STATE_CONNECTED)
-            bluetoothService.write("sr".getBytes(StandardCharsets.UTF_8));
+        if (bluetoothService.state == STATE_CONNECTED) {
+            try {
+                Packet packet = new Packet(A_MOVE_RIGHT);
+                bluetoothService.write(packet.getJSONString().getBytes(StandardCharsets.UTF_8));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 

@@ -1,5 +1,7 @@
 package com.ntu.cz3004.group4.androidremote.fragments;
 
+import static com.ntu.cz3004.group4.androidremote.Constants.A_MOVE_BACKWARD;
+import static com.ntu.cz3004.group4.androidremote.Constants.A_MOVE_FORWARD;
 import static com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService.STATE_CONNECTED;
 
 import android.os.Bundle;
@@ -16,6 +18,9 @@ import androidx.fragment.app.Fragment;
 
 import com.ntu.cz3004.group4.androidremote.R;
 import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService;
+import com.ntu.cz3004.group4.androidremote.bluetooth.Packet;
+
+import org.json.JSONException;
 
 import java.nio.charset.StandardCharsets;
 
@@ -59,13 +64,24 @@ public class LeftColFragment extends Fragment {
     }
 
     public void accelerate(View view) {
-        if (bluetoothService.state == STATE_CONNECTED)
-            bluetoothService.write("f".getBytes(StandardCharsets.UTF_8));
+        if (bluetoothService.state == STATE_CONNECTED) {
+            try {
+                Packet packet = new Packet(A_MOVE_FORWARD);
+                bluetoothService.write(packet.getJSONString().getBytes(StandardCharsets.UTF_8));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void reverse(View view) {
         if (bluetoothService.state == STATE_CONNECTED)
-            bluetoothService.write("r".getBytes(StandardCharsets.UTF_8));
+            try {
+                Packet packet = new Packet(A_MOVE_BACKWARD);
+                bluetoothService.write(packet.getJSONString().getBytes(StandardCharsets.UTF_8));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
     }
 
     public void setBluetoothService(BluetoothService bluetoothService) {

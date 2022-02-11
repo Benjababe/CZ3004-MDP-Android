@@ -4,68 +4,68 @@ import com.ntu.cz3004.group4.androidremote.R;
 
 public class ObstacleImages {
     // returns drawable id of corresponding recognised image
-    public static int getDrawableID(String imgName) {
-        switch (imgName) {
-            case "arrow_left":
-                return R.drawable.img_arrow_left;
-            case "arrow_right":
-                return R.drawable.img_arrow_right;
-            case "arrow_up": 
-                return R.drawable.img_arrow_up;
-            case "arrow_down":
-                return R.drawable.img_arrow_down;
-            case "circle":
-                return R.drawable.img_circle;
-            case "1":
+    public static int getDrawableID(int imageID) {
+        switch (imageID) {
+            case 11:
 			    return R.drawable.img_1;
-            case "2":
+            case 12:
 				return R.drawable.img_2;
-            case "3":
+            case 13:
 				return R.drawable.img_3;
-            case "4":
+            case 14:
 				return R.drawable.img_4;
-            case "5":
+            case 15:
 				return R.drawable.img_5;
-            case "6":
+            case 16:
 				return R.drawable.img_6;
-            case "7":
+            case 17:
 				return R.drawable.img_7;
-            case "8":
+            case 18:
 				return R.drawable.img_8;
-            case "9":
+            case 19:
 				return R.drawable.img_9;
-            case "a":
+            case 20:
 				return R.drawable.img_a;
-            case "b":
+            case 21:
 				return R.drawable.img_b;
-            case "c":
+            case 22:
 				return R.drawable.img_c;
-            case "d":
+            case 23:
 				return R.drawable.img_d;
-            case "e":
+            case 24:
 				return R.drawable.img_e;
-            case "f":
+            case 25:
 				return R.drawable.img_f;
-            case "g":
+            case 26:
 				return R.drawable.img_g;
-            case "h":
+            case 27:
 				return R.drawable.img_h;
-            case "s":
+            case 28:
 				return R.drawable.img_s;
-            case "t":
+            case 29:
 				return R.drawable.img_t;
-            case "u":
+            case 30:
 				return R.drawable.img_u;
-            case "v":
+            case 31:
 				return R.drawable.img_v;
-            case "w":
+            case 32:
 				return R.drawable.img_w;
-            case "x":
+            case 33:
 				return R.drawable.img_x;
-            case "y":
+            case 34:
 				return R.drawable.img_y;
-            case "z":
+            case 35:
 				return R.drawable.img_z;
+            case 36:
+                return R.drawable.img_arrow_up;
+            case 37:
+                return R.drawable.img_arrow_down;
+            case 38:
+                return R.drawable.img_arrow_right;
+            case 39:
+                return R.drawable.img_arrow_left;
+            case 40:
+                return R.drawable.img_circle;
             default:
                 return -1;
         }

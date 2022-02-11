@@ -4,6 +4,8 @@ import static android.view.DragEvent.ACTION_DRAG_ENTERED;
 import static android.view.DragEvent.ACTION_DRAG_EXITED;
 import static android.view.DragEvent.ACTION_DROP;
 import static com.ntu.cz3004.group4.androidremote.Constants.ADD_OBSTACLE;
+import static com.ntu.cz3004.group4.androidremote.Constants.A_MOVE_FORWARD;
+import static com.ntu.cz3004.group4.androidremote.Constants.A_RESET;
 import static com.ntu.cz3004.group4.androidremote.Constants.LOG;
 import static com.ntu.cz3004.group4.androidremote.Constants.MOVE_BACKWARD;
 import static com.ntu.cz3004.group4.androidremote.Constants.MOVE_FORWARD;
@@ -47,6 +49,7 @@ import com.ntu.cz3004.group4.androidremote.arena.ObstacleInfo;
 import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothDevicesActivity;
 import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothListener;
 import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService;
+import com.ntu.cz3004.group4.androidremote.bluetooth.Packet;
 import com.ntu.cz3004.group4.androidremote.fragments.ConsoleFragment;
 import com.ntu.cz3004.group4.androidremote.fragments.LeftColFragment;
 import com.ntu.cz3004.group4.androidremote.fragments.MapFragment;
@@ -122,10 +125,6 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         // passes onBluetoothStatusChange defined here into BluetoothService so it can manipulate views
         bluetoothService.setBluetoothStatusChange(this);
 
-        // message regex for image recognition
-        String regex = "imgrec\\s+(\\d+)\\s+(\\w+)";
-        msgPattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
-
         promptBTPermissions();
         listenBTFragment();
     }
@@ -142,12 +141,12 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
             return;
 
         // tilt left
-        if (e.values[0] > 3)
-            fragmentRightCol.steerLeft(null);
+        //if (e.values[0] > 3)
+        //    fragmentRightCol.steerLeft(null);
 
         // tilt right
-        if (e.values[0] < -3)
-            fragmentRightCol.steerRight(null);
+        //if (e.values[0] < -3)
+        //    fragmentRightCol.steerRight(null);
 
         // tilt forward
         if (e.values[1] < -3)
@@ -175,16 +174,12 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
-            Matcher m = msgPattern.matcher(strMessage);
-
-            if (m.matches())
-                drawObstacleImg(m);
         }
         return false;
     });
     private void setRPImsghandler(JSONObject objRPI ) throws JSONException{
-        JSONObject val = objRPI.getJSONObject("value");
+        JSONObject val = (objRPI.has("value"))? val = objRPI.getJSONObject("value") : null;
+        int x, y, imageID, direction;
         switch (objRPI.getInt("type"))
         {
             case MOVE_FORWARD:
@@ -200,15 +195,20 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
                 fragmentMap.rotateRobot(null,90);
                 break;
             case ADD_OBSTACLE:
-
+                x = val.getInt("X");
+                y = val.getInt("Y");
+                imageID = val.getInt("IMAGE_ID");
+                direction = val.getInt("DIRECTION");
+                drawObstacleImg(x, y, imageID);
                 break;
             case REMOVE_OBSTACLE:
+                imageID = val.getInt("IMAGE_ID");
+                fragmentMap.emptyCellObsID(imageID);
                 break;
             case UPDATE:
-                int x = val.getInt("ROBOT_X");
-                int y = val.getInt("ROBOT_Y");
+                x = val.getInt("ROBOT_X");
+                y = val.getInt("ROBOT_Y");
                 fragmentMap.setRobotXY(x,y);
-
                 break;
             case LOG:
                 String msg = val.getString("MESSAGE");
@@ -217,13 +217,14 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         }
     }
 
-    private void drawObstacleImg(Matcher m) {
-        // retrieve values from bluetooth message
-        int obstacleID = Integer.parseInt(m.group(1).trim());
-        String imgName = m.group(2).toLowerCase(Locale.ROOT).trim();
-
+    private void drawObstacleImg(int x, int y, int imageID) {
         // gets image to be drawn
-        Drawable imgDrawable = getImgDrawable(imgName);
+        Drawable imgDrawable = getImgDrawable(imageID);
+
+        int obstacleID = fragmentMap.getObstacleIDByCoord(x, y);
+
+        if (obstacleID == -1)
+            return;
 
         // gets corresponding obstacle
         ObstacleInfo obsInfo = fragmentMap.getObstacles().get(obstacleID);
@@ -235,8 +236,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
     }
 
     // gets drawable object of recognised image to draw onto arena cell
-    private Drawable getImgDrawable(String imgName) {
-        int drawableID = ObstacleImages.getDrawableID(imgName);
+    private Drawable getImgDrawable(int imageID) {
+        int drawableID = ObstacleImages.getDrawableID(imageID);
         return AppCompatResources.getDrawable(this, drawableID);
     }
 
@@ -344,8 +345,14 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
 
     public void onResetClick(View view) {
         fragmentMap.reset();
-        if (bluetoothService.state == STATE_CONNECTED)
-            bluetoothService.write("reset".getBytes(StandardCharsets.UTF_8));
+        if (bluetoothService.state == STATE_CONNECTED) {
+            try {
+                Packet packet = new Packet(A_RESET);
+                bluetoothService.write(packet.getJSONString().getBytes(StandardCharsets.UTF_8));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
