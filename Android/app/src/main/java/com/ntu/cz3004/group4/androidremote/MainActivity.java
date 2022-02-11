@@ -3,6 +3,14 @@ package com.ntu.cz3004.group4.androidremote;
 import static android.view.DragEvent.ACTION_DRAG_ENTERED;
 import static android.view.DragEvent.ACTION_DRAG_EXITED;
 import static android.view.DragEvent.ACTION_DROP;
+import static com.ntu.cz3004.group4.androidremote.Constants.ADD_OBSTACLE;
+import static com.ntu.cz3004.group4.androidremote.Constants.LOG;
+import static com.ntu.cz3004.group4.androidremote.Constants.MOVE_BACKWARD;
+import static com.ntu.cz3004.group4.androidremote.Constants.MOVE_FORWARD;
+import static com.ntu.cz3004.group4.androidremote.Constants.REMOVE_OBSTACLE;
+import static com.ntu.cz3004.group4.androidremote.Constants.TURN_LEFT;
+import static com.ntu.cz3004.group4.androidremote.Constants.TURN_RIGHT;
+import static com.ntu.cz3004.group4.androidremote.Constants.UPDATE;
 import static com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService.STATE_CONNECTED;
 
 import android.Manifest;
@@ -20,6 +28,7 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.DragEvent;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -43,12 +52,16 @@ import com.ntu.cz3004.group4.androidremote.fragments.LeftColFragment;
 import com.ntu.cz3004.group4.androidremote.fragments.MapFragment;
 import com.ntu.cz3004.group4.androidremote.fragments.RightColFragment;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 
 @SuppressWarnings({"ConstantConditions", "IntegerDivisionInFloatingPointContext"})
@@ -153,6 +166,16 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         if (message.what == Constants.MESSAGE_READ) {
             byte[] readBuf = (byte[]) message.obj;
             String strMessage = new String(readBuf, 0, message.arg1);
+            Log.d("receive from RPI", strMessage);
+            JSONObject objRPI = null;
+            try {
+                objRPI = new JSONObject(strMessage);
+                Log.d("RPI string", "string ok");
+                setRPImsghandler(objRPI);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
             Matcher m = msgPattern.matcher(strMessage);
 
             if (m.matches())
@@ -160,6 +183,39 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         }
         return false;
     });
+    private void setRPImsghandler(JSONObject objRPI ) throws JSONException{
+        JSONObject val = objRPI.getJSONObject("value");
+        switch (objRPI.getInt("type"))
+        {
+            case MOVE_FORWARD:
+                fragmentMap.moveRobot(true);
+                break;
+            case MOVE_BACKWARD:
+                fragmentMap.moveRobot(false);
+                break;
+            case TURN_LEFT:
+                fragmentMap.rotateRobot(null,-90);
+                break;
+            case TURN_RIGHT:
+                fragmentMap.rotateRobot(null,90);
+                break;
+            case ADD_OBSTACLE:
+
+                break;
+            case REMOVE_OBSTACLE:
+                break;
+            case UPDATE:
+                int x = val.getInt("ROBOT_X");
+                int y = val.getInt("ROBOT_Y");
+                fragmentMap.setRobotXY(x,y);
+
+                break;
+            case LOG:
+                String msg = val.getString("MESSAGE");
+                fragmentLeftCol.addConsoleMessage(msg);
+                break;
+        }
+    }
 
     private void drawObstacleImg(Matcher m) {
         // retrieve values from bluetooth message

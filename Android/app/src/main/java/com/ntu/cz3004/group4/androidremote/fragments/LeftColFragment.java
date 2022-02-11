@@ -55,6 +55,7 @@ public class LeftColFragment extends Fragment {
 
         consoleArrayAdapter = new ArrayAdapter<>(getContext(), R.layout.item_message);
         lvConsole.setAdapter(consoleArrayAdapter);
+        lvConsole.setSelection(consoleArrayAdapter.getCount()-1);
     }
 
     public void accelerate(View view) {
