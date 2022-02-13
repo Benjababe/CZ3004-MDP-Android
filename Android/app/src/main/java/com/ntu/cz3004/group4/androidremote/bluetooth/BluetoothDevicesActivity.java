@@ -1,10 +1,5 @@
 package com.ntu.cz3004.group4.androidremote.bluetooth;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
 import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -14,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,11 +21,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
 import com.ntu.cz3004.group4.androidremote.R;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 public class BluetoothDevicesActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
@@ -42,7 +40,6 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
     public DeviceListAdapter mDeviceListAdapter;
     public ArrayList<BluetoothDevice> list1 = new ArrayList<>();
     public ArrayList<BluetoothDevice> list2 = new ArrayList<>();
-    ListView lv_devices;
     ListView lvScan;
     BluetoothAdapter bluetoothAdapter;
     boolean m1 = false, m3 = false;
@@ -54,71 +51,48 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
 
         //initialise button and switch and listview
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        lvScan = findViewById(R.id.lvScan);
+
         Button btnOnOff = findViewById(R.id.btnOnOff);
         Button btnDiscover = findViewById(R.id.btnDiscover);
         Button btnScan = findViewById(R.id.btnScan);
-        lvScan = (ListView) findViewById(R.id.lvScan);
-        btnOnOff.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                enableDisableBT();
-            }
-        });
+
+        btnOnOff.setOnClickListener(view -> toggleBT());
+
         //Code for Discoveriblity
         btnDiscover.setOnClickListener(view -> {
             Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
             discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADVERTISE) != PackageManager.PERMISSION_GRANTED) {
                 startActivityForResult(discoverableIntent, 1);
-                return;
             }
         });
+
         //Code for Scan button
         btnScan.setOnClickListener(v -> {
             Log.d("Bluetooth Activity", "Button scan");
-            if (bluetoothAdapter.isDiscovering()) {
+            if (bluetoothAdapter.isDiscovering())
                 bluetoothAdapter.cancelDiscovery();
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-                    int permissionCheck = this.checkSelfPermission("Manifest.permission.ACCESS_FINE_LOCATION");
-                    permissionCheck += this.checkSelfPermission("Manifest.permission.ACCESS_COARSE_LOCATION");
-                    if (permissionCheck != 0) {
 
-                        this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1001); //Any number
-                    }
-                } else {
-                    Log.d("Bluetooth Activity", "checkBTPermissions: No need to check permissions. SDK version < LOLLIPOP.");
-                }
-                bluetoothAdapter.startDiscovery();
-                IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-                registerReceiver(mBroadcastReceiver3, discoverDevicesIntent);
-                m3 = true;
-            }
-            if (!bluetoothAdapter.isDiscovering()) {
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-                    int permissionCheck = this.checkSelfPermission("Manifest.permission.ACCESS_FINE_LOCATION");
-                    permissionCheck += this.checkSelfPermission("Manifest.permission.ACCESS_COARSE_LOCATION");
-                    if (permissionCheck != 0) {
+            int permissionCheck = this.checkSelfPermission("Manifest.permission.ACCESS_FINE_LOCATION");
+            permissionCheck += this.checkSelfPermission("Manifest.permission.ACCESS_COARSE_LOCATION");
 
-                        this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1001); //Any number
-                    }
-                } else {
-                    Log.d("Bluetooth Activity", "checkBTPermissions: No need to check permissions. SDK version < LOLLIPOP.");
-                }
-                bluetoothAdapter.startDiscovery();
-                IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-                registerReceiver(mBroadcastReceiver3, discoverDevicesIntent);
-                m3 = true;
-            }
+            if (permissionCheck != 0)
+                this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1001);
 
+            bluetoothAdapter.startDiscovery();
+            IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+            registerReceiver(mBroadcastReceiver3, discoverDevicesIntent);
 
+            m3 = true;
         });
 
-        // [TODO] Discover devices not paired -> Allow uses to pair from app?
+
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
 
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         registerReceiver(mBroadcastReceiver4, filter);
-
 
         if (!pairedDevices.isEmpty()) {
             list1.addAll(pairedDevices);
@@ -128,10 +102,11 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
         }
     }
 
-    public void enableDisableBT() {
+    public void toggleBT() {
         if (bluetoothAdapter == null) {
             Toast.makeText(BluetoothDevicesActivity.this, "Device does not have Bluetooth capabilities", Toast.LENGTH_SHORT).show();
         }
+
         if (!bluetoothAdapter.isEnabled()) {
             Intent enableBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
@@ -139,6 +114,7 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
                 return;
             }
         }
+
         if (bluetoothAdapter.isEnabled()) {
             bluetoothAdapter.disable();
             IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
@@ -152,8 +128,8 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             // When discovery finds a device
-            if (action.equals(bluetoothAdapter.ACTION_STATE_CHANGED)) {
-                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, bluetoothAdapter.ERROR);
+            if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
 
                 switch (state) {
                     case BluetoothAdapter.STATE_OFF:
@@ -174,31 +150,31 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
     };
 
     //Broadcast Receiver for listing devices that are not yet paired Executed by btnScan() method.
-    private BroadcastReceiver mBroadcastReceiver3 = new BroadcastReceiver() {
+    private final BroadcastReceiver mBroadcastReceiver3 = new BroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(Context context, Intent intent) throws SecurityException {
             final String action = intent.getAction();
             if (action.equals(BluetoothDevice.ACTION_FOUND)) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 if (device.getName() != null && device.getName().length() > 0 && !list1.contains(device) && !list2.contains(device))
                     list2.add(device);
-                Log.d("Bluetooth Activity","Broadcast Receiver 3");
+                Log.d("Bluetooth Activity", "Broadcast Receiver 3");
                 mDeviceListAdapter = new DeviceListAdapter(context, R.layout.item_scan_bluetooth_device, list2);
                 lvScan.setAdapter(mDeviceListAdapter);
-                lvScan.setSelection(mDeviceListAdapter.getCount()-1);
+                lvScan.setSelection(mDeviceListAdapter.getCount() - 1);
             }
         }
     };
 
-    private BroadcastReceiver mBroadcastReceiver4 = new BroadcastReceiver() {
+    private final BroadcastReceiver mBroadcastReceiver4 = new BroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(Context context, Intent intent) throws SecurityException {
             String TAG = "BTBOND";
             final String action = intent.getAction();
 
-            if(action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)){
+            if (action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
                 BluetoothDevice mDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if(mDevice.getBondState() == BluetoothDevice.BOND_BONDED){
+                if (mDevice.getBondState() == BluetoothDevice.BOND_BONDED) {
                     Log.d(TAG, "BOND_BONDED.");
                     list2.remove(mDevice);
                     list1.add(mDevice);
@@ -209,10 +185,10 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
                     devicesAdapter = new DeviceAdapter(BluetoothDevicesActivity.this, list1);
                     devicesListView.setAdapter(devicesAdapter);
                 }
-                if(mDevice.getBondState() == BluetoothDevice.BOND_BONDING){
+                if (mDevice.getBondState() == BluetoothDevice.BOND_BONDING) {
                     Log.d(TAG, "BOND_BONDING.");
                 }
-                if(mDevice.getBondState() == BluetoothDevice.BOND_NONE){
+                if (mDevice.getBondState() == BluetoothDevice.BOND_NONE) {
                     Log.d(TAG, "BOND_NONE.");
                 }
             }
@@ -233,7 +209,6 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
             bluetoothAdapter.cancelDiscovery();
             list2.get(i).createBond();
-            return;
         }
     }
 

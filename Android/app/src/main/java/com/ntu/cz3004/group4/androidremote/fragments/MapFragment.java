@@ -3,6 +3,7 @@ package com.ntu.cz3004.group4.androidremote.fragments;
 import static android.view.DragEvent.ACTION_DRAG_ENTERED;
 import static android.view.DragEvent.ACTION_DRAG_EXITED;
 import static android.view.DragEvent.ACTION_DROP;
+import static com.ntu.cz3004.group4.androidremote.Constants.A_ROBOT_POS;
 import static com.ntu.cz3004.group4.androidremote.Constants.EAST;
 import static com.ntu.cz3004.group4.androidremote.Constants.NORTH;
 import static com.ntu.cz3004.group4.androidremote.Constants.SOUTH;
@@ -37,6 +38,7 @@ import com.ntu.cz3004.group4.androidremote.arena.ArenaButton;
 import com.ntu.cz3004.group4.androidremote.arena.MyDragShadowBuilder;
 import com.ntu.cz3004.group4.androidremote.arena.ObstacleInfo;
 import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService;
+import com.ntu.cz3004.group4.androidremote.bluetooth.Packet;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,10 +54,10 @@ public class MapFragment extends Fragment {
     int robotRotation = 0;
 
     // robot defaults to facing north
-    int direction = NORTH;
+    int robotDirection = NORTH;
 
-    //Status,Direction and position updates for leftcol fragment
-    protected  float robot_x, robot_y;
+    //Status, Direction and position updates for leftcol fragment
+    protected int robotX, robotY;
     public LeftColFragment fragmentLeftCol;
 
     // keeps buttonIDs by xy coordinates
@@ -74,10 +76,13 @@ public class MapFragment extends Fragment {
 
     BluetoothService bluetoothService;
 
-    public MapFragment() {}
+    public MapFragment() {
+    }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) { super.onCreate(savedInstanceState); }
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -137,7 +142,12 @@ public class MapFragment extends Fragment {
 
     public void emptyCellObsID(int obstacleID) {
         ObstacleInfo obstacleInfo = obstacles.get(obstacleID);
-        ArenaButton btn = getView().findViewById(obstacleInfo.btnID);
+        assert obstacleInfo != null;
+
+        View v = getView();
+        assert v != null;
+
+        ArenaButton btn = v.findViewById(obstacleInfo.btnID);
         sendRemoveObstacle(obstacleInfo);
 
         obstacles.remove(obstacleID);
@@ -194,6 +204,7 @@ public class MapFragment extends Fragment {
             // adds robot onto map
             if (spawn.equals(getResources().getString(R.string.btn_robot))) {
                 spawnRobot(btn);
+                sendSpawnRobot();
             }
 
             // adds obstacle otherwise
@@ -246,9 +257,7 @@ public class MapFragment extends Fragment {
                         int obstacleID = json.getInt("obstacleID");
                         String dirSelected = json.getString("dirSelected");
                         addObstacle(obstacleID, newCell.getId(), dirs.indexOf(dirSelected));
-                    }
-
-                    catch (JSONException ex) {
+                    } catch (JSONException ex) {
                         ex.printStackTrace();
                     }
                     return true;
@@ -292,7 +301,7 @@ public class MapFragment extends Fragment {
         int borderID = R.drawable.top_border;
 
         // get drawable ID for image direction
-        switch(dirSelected) {
+        switch (dirSelected) {
             case EAST:
                 borderID = R.drawable.right_border;
                 break;
@@ -371,6 +380,19 @@ public class MapFragment extends Fragment {
     }
 
 
+    private void sendSpawnRobot() {
+        if (bluetoothService.state == STATE_CONNECTED) {
+            Packet packet = new Packet(A_ROBOT_POS);
+            packet.setX(robotX);
+            packet.setY(robotY);
+            packet.setDirection(robotDirection);
+            bluetoothService.write(packet.getJSONBytes());
+        } else {
+            Toast.makeText(this.getContext(), btAlert, Toast.LENGTH_LONG).show();
+        }
+    }
+
+
     // gets text value of radiobutton selected
     private String getSpawn() {
         int btnID = spawnGroup.getCheckedRadioButtonId();
@@ -380,13 +402,17 @@ public class MapFragment extends Fragment {
 
     // spawns robot image on button position
     private void spawnRobot(ArenaButton btn) {
-        robot_x = btn.x;
-        robot_y = btn.y;
-        fragmentLeftCol.setRobotPosition(getPosition());
-        fragmentLeftCol.setRoboDirection(getDirection());
+        robotX = btn.x;
+        robotY = btn.y;
+
+        // updates left col text
+        fragmentLeftCol.setRobotPosition(getPositionString());
+        fragmentLeftCol.setRoboDirection(getDirectionString());
+
         // gets button x and y coordinates
         int[] pt = new int[2];
         btn.getLocationInWindow(pt);
+
         // makes robot visible
         imgRobot.setVisibility(View.VISIBLE);
         // set robot drawing position to bottom left instead of top left
@@ -395,10 +421,10 @@ public class MapFragment extends Fragment {
         imgRobot.setY(pt[1] - dpToPixels(24) - dpToPixels(50));
 
         // rotates 90 degrees clockwise on click
-        imgRobot.setOnClickListener(robot -> rotateRobot(robot,90));
-
-
-
+        imgRobot.setOnClickListener(robot -> {
+            rotateRobot(robot, 90);
+            sendSpawnRobot();
+        });
     }
 
 
@@ -406,7 +432,7 @@ public class MapFragment extends Fragment {
     public void reset() {
         Set<Integer> keys = obstacles.keySet();
 
-        for (int key: keys) {
+        for (int key : keys) {
             ObstacleInfo obstacleInfo = obstacles.get(key);
             assert obstacleInfo != null;
             int btnID = obstacleInfo.btnID;
@@ -434,94 +460,53 @@ public class MapFragment extends Fragment {
     }
 
 
-    public void setBluetoothService(BluetoothService bluetoothService) {
-        this.bluetoothService = bluetoothService;
-    }
-
-    public void setSpawnGroup(RadioGroup spawnGroup) {
-        this.spawnGroup = spawnGroup;
-    }
-
     public HashMap<Integer, ObstacleInfo> getObstacles() {
         return obstacles;
     }
-    public void rotateRobot(View v, int rotation)
-    {
-        if(v == null)
-        {
+
+    public void rotateRobot(View v, int rotation) {
+        if (v == null)
             v = imgRobot;
-        }
-        if(rotation >0)
-        {
-            direction = (++direction)%4;
-        }
-        else if( rotation < 0)
-        {
-            if(direction == NORTH)
-            {
-                direction = WEST;
-            }
+
+        if (rotation > 0)
+            robotDirection = (robotDirection + 1) % 4;
+
+        else if (rotation < 0) {
+            if (robotDirection == NORTH)
+                robotDirection = WEST;
             else
-            {
-                direction--;
-            }
+                robotDirection--;
         }
+
         v.setPivotX(v.getWidth() / 2);
         v.setPivotY(v.getHeight() / 2);
+
         robotRotation = (robotRotation + rotation) % 360;
         v.setRotation(robotRotation);
-        fragmentLeftCol.setRoboDirection(getDirection());
-        Log.d("Check Direction", String.valueOf(direction));
+
+        fragmentLeftCol.setRoboDirection(getDirectionString());
+        Log.d("Check Direction", String.valueOf(robotDirection));
     }
 
 
     public void moveRobot(boolean forward) {
-        int multiplier = forward ? 1: -1;
-        switch(direction)
-        {
+        int multiplier = forward ? 1 : -1;
+        switch (robotDirection) {
             case NORTH:
                 imgRobot.setY(imgRobot.getY() - dpToPixels(25) * multiplier);
-                if(forward)
-                {
-                    robot_y++;
-                }
-                else
-                {
-                    robot_y--;
-                }
+                robotY += (forward) ? 1 : -1;
                 break;
             case SOUTH:
                 imgRobot.setY(imgRobot.getY() + dpToPixels(25) * multiplier);
-                if(forward)
-                {
-                    robot_y--;
-                }
-                else
-                {
-                    robot_y++;
-                }
+                robotY += (forward) ? -1 : 1;
                 break;
             case WEST:
                 imgRobot.setX(imgRobot.getX() - dpToPixels(25) * multiplier);
-                if(forward)
-                {
-                    robot_x--;
-                }
-                else
-                {
-                    robot_x++;
-                }
+                robotX += (forward) ? -1 : 1;
                 break;
             case EAST:
                 imgRobot.setX(imgRobot.getX() + dpToPixels(25) * multiplier);
-                if(forward)
-                {
-                    robot_x++;
-                }
-                else
-                {
-                    robot_x--;
-                }
+                robotX += (forward) ? 1 : -1;
                 break;
 
         }
@@ -529,51 +514,56 @@ public class MapFragment extends Fragment {
 
 
     public void setRobotXY(int x, int y) {
-         robot_x = x;
-         robot_y = y;
-         int btnid = coord[x][y];
-         ArenaButton cellbtn = getView().findViewById(btnid);
-         spawnRobot(cellbtn);
+        robotX = x;
+        robotY = y;
+        int btnID = coord[x][y];
+
+        View v = getView();
+        assert v != null;
+
+        ArenaButton btn = v.findViewById(btnID);
+        spawnRobot(btn);
     }
-    public String getDirection()
-    {
-        if(direction == NORTH)
-        {
-            return "NORTH";
-        }
-        else if (direction == SOUTH)
-        {
-            return "SOUTH";
-        }
-        else if(direction == EAST)
-        {
-            return "EAST";
-        }
-        else if (direction == WEST)
-        {
-            return "WEST";
-        }
-        return "";
+
+
+    public String getDirectionString() {
+        String[] dirArray = new String[]{"NORTH", "EAST", "SOUTH", "WEST"};
+        return dirArray[robotDirection];
     }
-    public String getPosition()
-    {
-        return "("+robot_x+","+robot_y+")";
+
+
+    public String getPositionString() {
+        return "(" + robotX + "," + robotY + ")";
     }
-    public void getLeftColFragment(LeftColFragment fragmentLeftCol1)
-    {
-        fragmentLeftCol = fragmentLeftCol1;
-    }
+
 
     public int getObstacleIDByCoord(int x, int y) {
         int btnID = coord[x][y];
         Set<Integer> keys = obstacles.keySet();
 
-        for (int key: keys) {
+        for (int key : keys) {
             ObstacleInfo obstacleInfo = obstacles.get(key);
+            assert obstacleInfo != null;
+
             if (obstacleInfo.btnID == btnID)
                 return key;
         }
 
         return -1;
+    }
+
+
+    public void setBluetoothService(BluetoothService bluetoothService) {
+        this.bluetoothService = bluetoothService;
+    }
+
+
+    public void setSpawnGroup(RadioGroup spawnGroup) {
+        this.spawnGroup = spawnGroup;
+    }
+
+
+    public void setLeftColFragment(LeftColFragment fragmentLeftCol) {
+        this.fragmentLeftCol = fragmentLeftCol;
     }
 }

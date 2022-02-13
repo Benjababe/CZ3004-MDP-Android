@@ -44,12 +44,14 @@ public class ConsoleFragment extends Fragment {
                 String writeMessage = new String(writeBuf);
                 consoleArrayAdapter.add("Me:  " + writeMessage);
                 break;
+
             case Constants.MESSAGE_READ:
                 byte[] readBuf = (byte[]) message.obj;
                 // construct a string from the valid bytes in the buffer
                 String readMessage = new String(readBuf, 0, message.arg1);
                 consoleArrayAdapter.add(connectedDeviceName + ":  " + readMessage);
                 break;
+
             case Constants.MESSAGE_DEVICE_NAME:
                 // save the connected device's name
                 btnSend.setEnabled(true);

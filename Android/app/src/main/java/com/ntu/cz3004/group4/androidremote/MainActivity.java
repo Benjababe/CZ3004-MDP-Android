@@ -4,7 +4,6 @@ import static android.view.DragEvent.ACTION_DRAG_ENTERED;
 import static android.view.DragEvent.ACTION_DRAG_EXITED;
 import static android.view.DragEvent.ACTION_DROP;
 import static com.ntu.cz3004.group4.androidremote.Constants.ADD_OBSTACLE;
-import static com.ntu.cz3004.group4.androidremote.Constants.A_MOVE_FORWARD;
 import static com.ntu.cz3004.group4.androidremote.Constants.A_RESET;
 import static com.ntu.cz3004.group4.androidremote.Constants.LOG;
 import static com.ntu.cz3004.group4.androidremote.Constants.MOVE_BACKWARD;
@@ -30,7 +29,6 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.DragEvent;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -61,10 +59,6 @@ import org.json.JSONObject;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 
 
 @SuppressWarnings({"ConstantConditions", "IntegerDivisionInFloatingPointContext"})
@@ -81,8 +75,6 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
     LeftColFragment fragmentLeftCol;
     RightColFragment fragmentRightCol;
 
-    Pattern msgPattern;
-
     SensorManager sensorManager;
     Sensor accel;
 
@@ -96,11 +88,13 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         initMotionControl();
     }
 
+
     @Override
     protected void onStart() {
         super.onStart();
         fragmentMap.setSpawnGroup(fragmentRightCol.getSpawnGroup());
     }
+
 
     // finds all used views in UI
     private void initViews() {
@@ -110,10 +104,11 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         fragmentLeftCol = (LeftColFragment) fragmentManager.findFragmentById(R.id.fragmentLeftCol);
         fragmentRightCol = (RightColFragment) fragmentManager.findFragmentById(R.id.fragmentRightCol);
 
-        fragmentMap.getLeftColFragment(fragmentLeftCol);
+        fragmentMap.setLeftColFragment(fragmentLeftCol);
         LinearLayout mainLayout = findViewById(R.id.main_layout);
         mainLayout.setOnDragListener(new OutOfBoundsDragListener());
     }
+
 
     private void initBT() {
         adapter = BluetoothAdapter.getDefaultAdapter();
@@ -130,24 +125,18 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         listenBTFragment();
     }
 
+
     private void initMotionControl() {
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorManager.registerListener(this, accel, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
+
     @Override
     public void onSensorChanged(SensorEvent e) {
         if (!fragmentRightCol.getSwitchTiltControl().isChecked())
             return;
-
-        // tilt left
-        //if (e.values[0] > 3)
-        //    fragmentRightCol.steerLeft(null);
-
-        // tilt right
-        //if (e.values[0] < -3)
-        //    fragmentRightCol.steerRight(null);
 
         // tilt forward
         if (e.values[1] < -3)
@@ -158,51 +147,57 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
             fragmentLeftCol.reverse(null);
     }
 
+
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
     }
+
 
     private final Handler btMsgHandler = new Handler(Looper.myLooper(), message -> {
         if (message.what == Constants.MESSAGE_READ) {
             byte[] readBuf = (byte[]) message.obj;
             String strMessage = new String(readBuf, 0, message.arg1);
-            Log.d("receive from RPI", strMessage);
-            JSONObject objRPI = null;
+
             try {
-                objRPI = new JSONObject(strMessage);
-                Log.d("RPI string", "string ok");
-                setRPImsghandler(objRPI);
+                JSONObject json = new JSONObject(strMessage);
+                rpiMessageHandler(json);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
         return false;
     });
-    private void setRPImsghandler(JSONObject objRPI ) throws JSONException{
-        JSONObject val = (objRPI.has("value"))? val = objRPI.getJSONObject("value") : null;
+
+
+    private void rpiMessageHandler(JSONObject json) throws JSONException {
+        JSONObject val = (json.has("value")) ? json.getJSONObject("value") : null;
         int x, y, imageID, direction;
-        switch (objRPI.getInt("type"))
-        {
+
+        switch (json.getInt("type")) {
             case MOVE_FORWARD:
                 fragmentLeftCol.setRoboStatus("MOVE FORWARD");
                 fragmentMap.moveRobot(true);
-                fragmentLeftCol.setRobotPosition(fragmentMap.getPosition());
+                fragmentLeftCol.setRobotPosition(fragmentMap.getPositionString());
                 break;
+
             case MOVE_BACKWARD:
                 fragmentLeftCol.setRoboStatus("MOVE BACKWARD");
                 fragmentMap.moveRobot(false);
-                fragmentLeftCol.setRobotPosition(fragmentMap.getPosition());
+                fragmentLeftCol.setRobotPosition(fragmentMap.getPositionString());
                 break;
+
             case TURN_LEFT:
                 fragmentLeftCol.setRoboStatus("TURN LEFT");
-                fragmentMap.rotateRobot(null,-90);
-                fragmentLeftCol.setRoboDirection(fragmentMap.getDirection());
+                fragmentMap.rotateRobot(null, -90);
+                fragmentLeftCol.setRoboDirection(fragmentMap.getDirectionString());
                 break;
+
             case TURN_RIGHT:
                 fragmentLeftCol.setRoboStatus("TURN RIGHT");
-                fragmentMap.rotateRobot(null,90);
-                fragmentLeftCol.setRoboDirection(fragmentMap.getDirection());
+                fragmentMap.rotateRobot(null, 90);
+                fragmentLeftCol.setRoboDirection(fragmentMap.getDirectionString());
                 break;
+
             case ADD_OBSTACLE:
                 fragmentLeftCol.setRoboStatus("ADD OBSTACLE");
                 x = val.getInt("X");
@@ -211,17 +206,20 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
                 direction = val.getInt("DIRECTION");
                 drawObstacleImg(x, y, imageID);
                 break;
+
             case REMOVE_OBSTACLE:
                 fragmentLeftCol.setRoboStatus("REMOVE OBSTACLE");
                 imageID = val.getInt("IMAGE_ID");
                 fragmentMap.emptyCellObsID(imageID);
                 break;
+
             case UPDATE:
                 x = val.getInt("ROBOT_X");
                 y = val.getInt("ROBOT_Y");
-                fragmentMap.setRobotXY(x,y);
-                fragmentLeftCol.setRobotPosition(fragmentMap.getPosition());
+                fragmentMap.setRobotXY(x, y);
+                fragmentLeftCol.setRobotPosition(fragmentMap.getPositionString());
                 break;
+
             case LOG:
                 String msg = val.getString("MESSAGE");
                 fragmentLeftCol.addConsoleMessage(msg);
@@ -247,11 +245,13 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         btn.setText("");
     }
 
+
     // gets drawable object of recognised image to draw onto arena cell
     private Drawable getImgDrawable(int imageID) {
         int drawableID = ObstacleImages.getDrawableID(imageID);
         return AppCompatResources.getDrawable(this, drawableID);
     }
+
 
     private void promptBTPermissions() {
         // permissions to handle bluetooth
@@ -270,9 +270,10 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         }
     }
 
+
     private void listenBTFragment() {
         activityLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-            if(result.getResultCode() == Activity.RESULT_OK) {
+            if (result.getResultCode() == Activity.RESULT_OK) {
                 // retrieves data sent from closed BT intent
                 Intent intent = result.getData();
                 Bundle intentBundle = intent.getExtras();
@@ -285,8 +286,10 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         });
     }
 
+
     // handles the runnable for reconnecting to bluetooth device
     Handler reconnectHandler = new Handler();
+
 
     // runnable that runs code to reconnect to bluetooth device
     Runnable reconnectRunnable = new Runnable() {
@@ -306,10 +309,11 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
     // prompt user whether to reconnect to bluetooth device
     private void promptReconnect() {
         new AlertDialog.Builder(this).setTitle("Reconnect to Bluetooth Device")
-        .setPositiveButton("Yes", (dialogInterface, i) -> reconnectHandler.postDelayed(reconnectRunnable, 2000))
-        .setNegativeButton("No", null)
-        .show();
+                .setPositiveButton("Yes", (dialogInterface, i) -> reconnectHandler.postDelayed(reconnectRunnable, 2000))
+                .setNegativeButton("No", null)
+                .show();
     }
+
 
     // adopted from BluetoothListener interface, used in BluetoothService class
     public void onBluetoothStatusChange(int status) {
@@ -355,6 +359,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         }
     }
 
+
     public void onResetClick(View view) {
         fragmentMap.reset();
         if (bluetoothService.state == STATE_CONNECTED) {
@@ -366,6 +371,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
             }
         }
     }
+
 
     @Override
     protected void onDestroy() {

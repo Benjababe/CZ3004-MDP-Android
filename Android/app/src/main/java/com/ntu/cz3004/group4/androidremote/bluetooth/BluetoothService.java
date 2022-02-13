@@ -94,12 +94,12 @@ public class BluetoothService {
             }
         }
 
-        if(connectThread != null) {
+        if (connectThread != null) {
             connectThread.cancel();
             connectThread = null;
         }
 
-        if(connectedThread != null) {
+        if (connectedThread != null) {
             connectedThread.cancel();
             connectedThread = null;
         }
@@ -120,7 +120,7 @@ public class BluetoothService {
             connectedThread = null;
         }
 
-        if(acceptThread != null){
+        if (acceptThread != null) {
             acceptThread.cancel();
             acceptThread = null;
         }
@@ -264,7 +264,7 @@ public class BluetoothService {
         public AcceptThread() {
             BluetoothServerSocket tmp = null;
 
-            try{
+            try {
                 tmp = bluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(APP_NAME, APP_UUID);
             } catch (IOException e) {
                 Log.e(TAG, "Socket's listen() failed", e);
@@ -351,7 +351,7 @@ public class BluetoothService {
             buffer = new byte[1024];
             int bytes;
 
-            while(state == STATE_CONNECTED) {
+            while (state == STATE_CONNECTED) {
                 try {
                     bytes = is.read(buffer);
                     handler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, buffer)

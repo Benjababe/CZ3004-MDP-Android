@@ -35,10 +35,13 @@ public class RightColFragment extends Fragment {
     BluetoothService bluetoothService;
     public boolean btEnabled = false;
 
-    public RightColFragment() {}
+    public RightColFragment() {
+    }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) { super.onCreate(savedInstanceState); }
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

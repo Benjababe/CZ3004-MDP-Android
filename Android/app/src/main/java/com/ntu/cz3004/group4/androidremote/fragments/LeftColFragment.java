@@ -34,10 +34,13 @@ public class LeftColFragment extends Fragment {
 
     BluetoothService bluetoothService;
 
-    public LeftColFragment() {}
+    public LeftColFragment() {
+    }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) { super.onCreate(savedInstanceState); }
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -60,28 +63,21 @@ public class LeftColFragment extends Fragment {
 
         consoleArrayAdapter = new ArrayAdapter<>(getContext(), R.layout.item_message);
         lvConsole.setAdapter(consoleArrayAdapter);
-        lvConsole.setSelection(consoleArrayAdapter.getCount()-1);
+        lvConsole.setSelection(consoleArrayAdapter.getCount() - 1);
     }
 
     public void accelerate(View view) {
         if (bluetoothService.state == STATE_CONNECTED) {
-            try {
                 Packet packet = new Packet(A_MOVE_FORWARD);
-                bluetoothService.write(packet.getJSONString().getBytes(StandardCharsets.UTF_8));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+                bluetoothService.write(packet.getJSONBytes());
         }
     }
 
     public void reverse(View view) {
-        if (bluetoothService.state == STATE_CONNECTED)
-            try {
-                Packet packet = new Packet(A_MOVE_BACKWARD);
-                bluetoothService.write(packet.getJSONString().getBytes(StandardCharsets.UTF_8));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+        if (bluetoothService.state == STATE_CONNECTED) {
+            Packet packet = new Packet(A_MOVE_BACKWARD);
+            bluetoothService.write(packet.getJSONBytes());
+        }
     }
 
 
