@@ -255,9 +255,11 @@ public class MapFragment extends Fragment {
 
                         // moves obstacle over to new cell
                         int obstacleID = json.getInt("obstacleID");
-                        String dirSelected = json.getString("dirSelected");
-                        addObstacle(obstacleID, newCell.getId(), dirs.indexOf(dirSelected));
-                    } catch (JSONException ex) {
+                        int dirSelected = json.getInt("dirSelected");
+                        addObstacle(obstacleID, newCell.getId(), dirSelected);
+                    }
+                    
+                    catch (JSONException ex) {
                         ex.printStackTrace();
                     }
                     return true;
