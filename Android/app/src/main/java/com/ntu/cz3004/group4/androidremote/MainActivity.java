@@ -214,9 +214,13 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
                 break;
 
             case UPDATE:
+                fragmentLeftCol.setRoboStatus("Updating Robot");
                 x = val.getInt("x");
                 y = val.getInt("y");
+                direction = val.getInt("direction");
+                fragmentMap.setRobotDirection(direction);
                 fragmentMap.setRobotXY(x, y);
+                fragmentLeftCol.setRoboDirection(fragmentMap.getDirectionString());
                 fragmentLeftCol.setRobotPosition(fragmentMap.getPositionString());
                 break;
 
