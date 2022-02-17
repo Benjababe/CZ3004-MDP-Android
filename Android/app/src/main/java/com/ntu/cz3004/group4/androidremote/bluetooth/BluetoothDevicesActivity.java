@@ -1,6 +1,7 @@
 package com.ntu.cz3004.group4.androidremote.bluetooth;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -88,13 +89,17 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
             m3 = true;
         });
 
-
-        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
+        refreshPairedDevices();
 
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         registerReceiver(mBroadcastReceiver4, filter);
+    }
 
+    public void refreshPairedDevices() {
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        @SuppressLint("MissingPermission") Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
         if (!pairedDevices.isEmpty()) {
+            list1.clear();
             list1.addAll(pairedDevices);
             devicesListView = findViewById(R.id.lv_devices);
             devicesAdapter = new DeviceAdapter(BluetoothDevicesActivity.this, list1);
@@ -174,11 +179,12 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
             final String action = intent.getAction();
 
             if (action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
+
+                refreshPairedDevices();
                 BluetoothDevice mDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 if (mDevice.getBondState() == BluetoothDevice.BOND_BONDED) {
                     Log.d(TAG, "BOND_BONDED.");
                     list2.remove(mDevice);
-                    list1.add(mDevice);
 
                     mDeviceListAdapter = new DeviceListAdapter(context, R.layout.item_scan_bluetooth_device, list2);
                     lvScan.setAdapter(mDeviceListAdapter);
