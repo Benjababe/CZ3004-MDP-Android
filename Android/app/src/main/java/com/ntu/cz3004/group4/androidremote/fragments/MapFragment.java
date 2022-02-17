@@ -451,6 +451,7 @@ public class MapFragment extends Fragment {
 
         obstacles.clear();
         imgRobot.setVisibility(View.GONE);
+
         fragmentLeftCol.setRoboStatus("Status");
         fragmentLeftCol.setRoboDirection("Direction");
         fragmentLeftCol.setRobotPosition("(x,y)");

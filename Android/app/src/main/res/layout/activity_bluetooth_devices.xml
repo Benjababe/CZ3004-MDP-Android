@@ -56,7 +56,7 @@
         <ListView
             android:id="@+id/lv_devices"
             android:layout_width="fill_parent"
-            android:layout_height="180dp">
+            android:layout_height="165dp">
 
         </ListView>
 
@@ -70,11 +70,10 @@
 
         <ListView
             android:id="@+id/lvScan"
-            android:transcriptMode="alwaysScroll"
-            android:stackFromBottom="true"
             android:layout_width="fill_parent"
-            android:layout_height="180dp"
-            android:layout_marginTop="12dp" />
+            android:layout_height="165dp"
+            android:stackFromBottom="true"
+            android:transcriptMode="alwaysScroll" />
 
     </LinearLayout>
 

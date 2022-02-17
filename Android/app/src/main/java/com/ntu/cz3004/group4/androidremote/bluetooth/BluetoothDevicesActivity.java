@@ -116,6 +116,7 @@ public class BluetoothDevicesActivity extends AppCompatActivity implements Adapt
         }
 
         if (bluetoothAdapter.isEnabled()) {
+            Toast.makeText(BluetoothDevicesActivity.this, "Turning Off Bluetooth", Toast.LENGTH_SHORT).show();
             bluetoothAdapter.disable();
             IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
             registerReceiver(mBroadcastReceiver1, BTIntent);

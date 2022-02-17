@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/NTU/YEAR 2 SEM 2/CZ3004/Android/app/src/main/res/layout/activity_bluetooth_devices.xml" value="0.1796875" />
+        <entry key="..\:/NTU/YEAR 2 SEM 2/CZ3004/Android/app/src/main/res/layout/fragment_left_col.xml" value="0.1796875" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK" />
+</project>
