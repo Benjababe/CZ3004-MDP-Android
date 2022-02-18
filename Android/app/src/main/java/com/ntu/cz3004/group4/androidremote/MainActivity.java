@@ -247,6 +247,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         ArenaButton btn = findViewById(obsInfo.btnID);
         btn.setBackground(imgDrawable);
         btn.setText("");
+        btn.setTextColor(Color.parseColor("#FFFFFFFF"));
     }
 
 

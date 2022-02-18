@@ -127,7 +127,7 @@ public class MapFragment extends Fragment {
                 btn.setPadding(1, 1, 1, 1);
                 btn.setBackground(btnBG);
                 btn.setLayoutParams(new TableRow.LayoutParams(btnW, btnH));
-                btn.setTextColor(Color.rgb(255, 0, 0));
+                btn.setTextColor(Color.rgb(255, 255, 255));
 
                 coord[x][y] = btn.getId();
 
