@@ -8,9 +8,6 @@ import com.ntu.cz3004.group4.androidremote.bluetooth.Packet;
 import org.json.JSONException;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Locale;
 
 public class ObstacleInfo {
     public int x, y, dir, btnID, obstacleID;

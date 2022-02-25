@@ -257,9 +257,7 @@ public class MapFragment extends Fragment {
                         int obstacleID = json.getInt("obstacleID");
                         int dirSelected = json.getInt("dirSelected");
                         addObstacle(obstacleID, newCell.getId(), dirSelected);
-                    }
-                    
-                    catch (JSONException ex) {
+                    } catch (JSONException ex) {
                         ex.printStackTrace();
                     }
                     return true;
@@ -570,8 +568,8 @@ public class MapFragment extends Fragment {
     public void setLeftColFragment(LeftColFragment fragmentLeftCol) {
         this.fragmentLeftCol = fragmentLeftCol;
     }
-    public void setRobotDirection(int direction)
-    {
+
+    public void setRobotDirection(int direction) {
         this.robotDirection = direction;
     }
 

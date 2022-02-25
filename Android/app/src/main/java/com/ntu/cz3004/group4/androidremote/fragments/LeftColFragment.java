@@ -20,10 +20,6 @@ import com.ntu.cz3004.group4.androidremote.R;
 import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService;
 import com.ntu.cz3004.group4.androidremote.bluetooth.Packet;
 
-import org.json.JSONException;
-
-import java.nio.charset.StandardCharsets;
-
 public class LeftColFragment extends Fragment {
     ListView lvConsole;
     TextView txtRoboStatus, txtRoboDirection, txtRoboPosition;
@@ -68,8 +64,8 @@ public class LeftColFragment extends Fragment {
 
     public void accelerate(View view) {
         if (bluetoothService.state == STATE_CONNECTED) {
-                Packet packet = new Packet(A_MOVE_FORWARD);
-                bluetoothService.write(packet.getJSONBytes());
+            Packet packet = new Packet(A_MOVE_FORWARD);
+            bluetoothService.write(packet.getJSONBytes());
         }
     }
 
