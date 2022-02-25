@@ -7,7 +7,7 @@ public class ObstacleImages {
     public static int getDrawableID(int imageID) {
         switch (imageID) {
             case 1:
-                return R.drawable.ic_bullseye;
+                return R.drawable.img_bullseye;
             case 11:
 			    return R.drawable.img_1;
             case 12:
