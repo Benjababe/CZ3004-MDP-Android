@@ -2,7 +2,6 @@ package com.ntu.cz3004.group4.androidremote.fragments;
 
 import static com.ntu.cz3004.group4.androidremote.Constants.A_FASTEST_PATH;
 import static com.ntu.cz3004.group4.androidremote.Constants.A_IMG_REC;
-import static com.ntu.cz3004.group4.androidremote.Constants.A_MOVE_FORWARD;
 import static com.ntu.cz3004.group4.androidremote.Constants.A_MOVE_LEFT;
 import static com.ntu.cz3004.group4.androidremote.Constants.A_MOVE_RIGHT;
 import static com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService.STATE_CONNECTED;

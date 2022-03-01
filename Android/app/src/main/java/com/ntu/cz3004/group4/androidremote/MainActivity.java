@@ -32,7 +32,6 @@ import android.os.Looper;
 import android.view.DragEvent;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.TableRow;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -204,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
                 x = val.getInt("X");
                 y = val.getInt("Y");
                 imageID = val.getInt("IMAGE_ID");
-                direction = val.getInt("DIRECTION");
+                // direction = val.getInt("DIRECTION");
                 drawObstacleImg(x, y, imageID);
                 break;
 
@@ -246,9 +245,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
 
         // draws recognised image onto obstacle block
         ArenaButton btn = findViewById(obsInfo.btnID);
-        imgDrawable.setBounds(2,2,btn.getWidth()-2,btn.getHeight()-2);
+        imgDrawable.setBounds(2,2,btn.getWidth() - 2,btn.getHeight() - 2);
         btn.getOverlay().add(imgDrawable);
-//        btn.setBackground(imgDrawable);
         btn.setText("");
         btn.setTextColor(Color.parseColor("#FFFFFFFF"));
     }

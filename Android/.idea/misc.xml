@@ -6,12 +6,48 @@
         <entry key="..\:/NTU/YEAR 2 SEM 2/CZ3004/Android/app/src/main/res/drawable/border.xml" value="0.1715" />
         <entry key="..\:/NTU/YEAR 2 SEM 2/CZ3004/Android/app/src/main/res/drawable/bottom_border.xml" value="0.1715" />
         <entry key="..\:/NTU/YEAR 2 SEM 2/CZ3004/Android/app/src/main/res/layout/activity_bluetooth_devices.xml" value="0.1796875" />
-        <entry key="..\:/NTU/YEAR 2 SEM 2/CZ3004/Android/app/src/main/res/layout/activity_main.xml" value="0.3515625" />
-        <entry key="..\:/NTU/YEAR 2 SEM 2/CZ3004/Android/app/src/main/res/layout/fragment_left_col.xml" value="0.1796875" />
-        <entry key="..\:/NTU/YEAR 2 SEM 2/CZ3004/Android/app/src/main/res/layout/fragment_map.xml" value="0.1796875" />
-        <entry key="..\:/NTU/YEAR 2 SEM 2/CZ3004/Android/app/src/main/res/layout/item_scan_bluetooth_device.xml" value="0.14270833333333333" />
+        <entry key="..\:/NTU/YEAR 2 SEM 2/CZ3004/Android/app/src/main/res/layout/fragment_left_col.xml" value="0.3333333333333333" />
+        <entry key="..\:/Users/Benjababe/Desktop/CZ3004-MDP/Android/app/src/main/res/drawable/border.xml" value="0.1985" />
+        <entry key="..\:/Users/Benjababe/Desktop/CZ3004-MDP/Android/app/src/main/res/drawable/bottom_border.xml" value="0.1985" />
+        <entry key="..\:/Users/Benjababe/Desktop/CZ3004-MDP/Android/app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/drawable/border.xml" value="0.2296875" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/drawable/bottom_border.xml" value="0.18125" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/drawable/btn_background.xml" value="0.17291666666666666" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/drawable/ic__.xml" value="0.328125" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/drawable/ic_robot_left.xml" value="0.328125" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/drawable/img_1.xml" value="0.176" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/drawable/img_6.xml" value="0.176" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/drawable/left_border.xml" value="0.18125" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/drawable/right_border.xml" value="0.18125" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/drawable/thin_border.xml" value="0.2296875" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/drawable/top_border.xml" value="0.18125" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/layout/activity_bluetooth_devices.xml" value="0.24547101449275363" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/layout/activity_main.xml" value="0.33" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/layout/bluetooth_menu.xml" value="0.16875" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/layout/bt_list_item.xml" value="0.16875" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/layout/fragment_console.xml" value="0.24547101449275363" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/layout/fragment_left_col.xml" value="0.24456521739130435" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/layout/fragment_map.xml" value="0.24456521739130435" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/layout/fragment_right_col.xml" value="0.24456521739130435" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/layout/item_bluetooth_device.xml" value="0.24456521739130435" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/layout/item_message.xml" value="0.24456521739130435" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/layout/item_scan_bluetooth_device.xml" value="0.1" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/layout/layout.xml" value="0.16875" />
+        <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/layout/map_cell.xml" value="0.2368659420289855" />
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK" />
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+  <component name="VisualizationToolProject">
+    <option name="state">
+      <ProjectState>
+        <option name="scale" value="0.1" />
+      </ProjectState>
+    </option>
+  </component>
 </project>
