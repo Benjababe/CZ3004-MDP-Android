@@ -420,7 +420,7 @@ public class MapFragment extends Fragment {
         // set robot drawing position to bottom left instead of top left
         imgRobot.setX(btn.getX());
         // 24 for status bar and 50 for placing it 2 buttons up
-        imgRobot.setY(pt[1] - dpToPixels(24) - dpToPixels(50));
+        imgRobot.setY(pt[1] - dpToPixels(24) - dpToPixels(25));
 
         imgRobot.setRotation(((robotDirection) * 90) % 360);
         // rotates 90 degrees clockwise on click

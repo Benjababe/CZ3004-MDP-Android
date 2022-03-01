@@ -19,7 +19,6 @@ public class Packet {
     public String getJSONString() throws JSONException {
         JSONObject json = new JSONObject();
         json.put("type", type);
-
         JSONObject value = new JSONObject();
 
         if (x != -1)

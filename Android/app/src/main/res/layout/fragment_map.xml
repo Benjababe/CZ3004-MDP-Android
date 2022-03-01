@@ -14,8 +14,8 @@
 
     <ImageView
         android:id="@+id/imgRobot"
-        android:layout_width="75dp"
-        android:layout_height="75dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:contentDescription="@string/img_robot_description"
         android:elevation="3dp"
         android:visibility="invisible"
