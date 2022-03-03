@@ -34,6 +34,8 @@
         <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/layout/item_scan_bluetooth_device.xml" value="0.1" />
         <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/layout/layout.xml" value="0.16875" />
         <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/layout/map_cell.xml" value="0.2368659420289855" />
+        <entry key="app/src/main/res/layout/fragment_left_col.xml" value="0.19270833333333334" />
+        <entry key="app/src/main/res/layout/fragment_map.xml" value="0.19270833333333334" />
       </map>
     </option>
   </component>

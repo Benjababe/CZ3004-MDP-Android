@@ -39,36 +39,39 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="130dp"
+            android:layout_height="200dp"
             android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/imgRecog"
-                android:layout_width="90dp"
-                android:layout_height="90dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="5dp"
-                android:contentDescription="@string/img_recog_description"
-                android:visibility="invisible" />
+            <org.videolan.libvlc.util.VLCVideoLayout
+                android:id="@+id/vidRPI"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="5dp"
-                android:text="@string/img_recog_subtitle"
-                android:visibility="invisible" />
+            </org.videolan.libvlc.util.VLCVideoLayout>
+
         </LinearLayout>
 
         <ListView
             android:id="@+id/lvConsole"
-            android:transcriptMode="alwaysScroll"
-            android:stackFromBottom="true"
             android:layout_width="match_parent"
             android:layout_height="140dp"
             android:layout_marginTop="5dp"
             android:background="@drawable/border"
-            android:text="@string/console" />
+            android:stackFromBottom="true"
+            android:text="@string/console"
+            android:transcriptMode="alwaysScroll"
+            android:visibility="gone">
+
+        </ListView>
+
+        <Button
+            android:id="@+id/btnVid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|center_vertical"
+            android:gravity="center_horizontal"
+            android:onClick="onBtnConnectClick"
+            android:text="@string/toggle_video" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -97,6 +100,7 @@
                 android:contentDescription="@string/btn_reverse_description"
                 android:src="@android:drawable/arrow_down_float"
                 app:tint="#FFEB3B" />
+
         </RelativeLayout>
 
     </LinearLayout>
