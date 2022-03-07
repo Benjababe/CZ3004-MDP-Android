@@ -10,6 +10,7 @@ import static com.ntu.cz3004.group4.androidremote.Constants.SOUTH;
 import static com.ntu.cz3004.group4.androidremote.Constants.WEST;
 import static com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService.STATE_CONNECTED;
 
+import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -212,7 +213,7 @@ public class MapFragment extends Fragment {
                 for (int obsID = 1; obsID <= 400; obsID++) {
                     // finds next obstacle id
                     if (!obstacles.containsKey(obsID)) {
-                        queryObstacleDirection(obsID, this.id);
+                        queryObstacleDirection(obsID, this.id, this.x, this.y);
                         break;
                     }
                 }
@@ -267,7 +268,8 @@ public class MapFragment extends Fragment {
     }
 
 
-    private void queryObstacleDirection(int obstacleID, int btnID) {
+    @SuppressLint("DefaultLocale")
+    private void queryObstacleDirection(int obstacleID, int btnID, int x, int y) {
         // 4 choices of directions
         final String[] directions = {"Top", "Left", "Bottom", "Right"};
 
@@ -276,7 +278,7 @@ public class MapFragment extends Fragment {
 
         // retrieves direction of image on obstacle through radiobuttons
         AlertDialog.Builder builder = new AlertDialog.Builder(this.requireContext());
-        builder.setTitle("Choose direction of image");
+        builder.setTitle(String.format("Choose direction of image (%d, %d)", x, y));
         builder.setSingleChoiceItems(directions, 0, (dialogInterface, i) -> dirSelected[0] = directions[i]);
 
         // confirm to add obstacle
@@ -550,7 +552,6 @@ public class MapFragment extends Fragment {
             if (obstacleInfo.btnID == btnID)
                 return key;
         }
-
         return -1;
     }
 

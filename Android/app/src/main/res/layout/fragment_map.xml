@@ -19,6 +19,6 @@
         android:contentDescription="@string/img_robot_description"
         android:elevation="3dp"
         android:visibility="invisible"
-        app:srcCompat="@drawable/img_robot"
+        app:srcCompat="@drawable/img_robot_png"
         tools:ignore="MissingConstraints" />
 </androidx.constraintlayout.widget.ConstraintLayout>
