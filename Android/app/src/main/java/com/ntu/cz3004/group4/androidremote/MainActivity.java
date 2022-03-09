@@ -206,20 +206,20 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
 
             case ADD_OBSTACLE:
                 fragmentLeftCol.setRoboStatus("ADD OBSTACLE");
-                x = val.getInt("X");
-                y = val.getInt("Y");
+                x = val.getInt("x");
+                y = val.getInt("y");
                 if(x < 0) x= 0;
                 if(x > 19) x =19;
                 if(y < 0) y = 0;
                 if(y > 19) y = 19;
-                imageID = val.getInt("IMAGE_ID");
+                imageID = val.getInt("image_id");
                 // direction = val.getInt("DIRECTION");
                 drawObstacleImg(x, y, imageID);
                 break;
 
             case REMOVE_OBSTACLE:
                 fragmentLeftCol.setRoboStatus("REMOVE OBSTACLE");
-                imageID = val.getInt("IMAGE_ID");
+                imageID = val.getInt("image_id");
                 fragmentMap.emptyCellObsID(imageID);
                 break;
 
