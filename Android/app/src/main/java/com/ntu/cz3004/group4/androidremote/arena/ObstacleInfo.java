@@ -6,6 +6,7 @@ import static com.ntu.cz3004.group4.androidremote.Constants.A_REM_OBSTACLE;
 import com.ntu.cz3004.group4.androidremote.bluetooth.Packet;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
 
@@ -49,5 +50,20 @@ public class ObstacleInfo {
             e.printStackTrace();
         }
         return res.getBytes(StandardCharsets.UTF_8);
+    }
+    public JSONObject obToString(){
+        try {
+            JSONObject json = new JSONObject();
+            json.put("obstacle_id", obstacleID);
+            json.put("x", x);
+            json.put("y", y);
+            json.put("direction", dir);
+            return json;
+        }
+        catch (JSONException e)
+        {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

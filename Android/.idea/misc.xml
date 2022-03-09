@@ -5,8 +5,10 @@
       <map>
         <entry key="..\:/NTU/YEAR 2 SEM 2/CZ3004/Android/app/src/main/res/drawable/border.xml" value="0.1715" />
         <entry key="..\:/NTU/YEAR 2 SEM 2/CZ3004/Android/app/src/main/res/drawable/bottom_border.xml" value="0.1715" />
+        <entry key="..\:/NTU/YEAR 2 SEM 2/CZ3004/Android/app/src/main/res/drawable/img_robot.xml" value="0.177" />
         <entry key="..\:/NTU/YEAR 2 SEM 2/CZ3004/Android/app/src/main/res/layout/activity_bluetooth_devices.xml" value="0.1796875" />
         <entry key="..\:/NTU/YEAR 2 SEM 2/CZ3004/Android/app/src/main/res/layout/fragment_left_col.xml" value="0.3333333333333333" />
+        <entry key="..\:/NTU/YEAR 2 SEM 2/CZ3004/Android/app/src/main/res/layout/fragment_map.xml" value="0.1" />
         <entry key="..\:/Users/Benjababe/Desktop/CZ3004-MDP/Android/app/src/main/res/drawable/border.xml" value="0.1985" />
         <entry key="..\:/Users/Benjababe/Desktop/CZ3004-MDP/Android/app/src/main/res/drawable/bottom_border.xml" value="0.1985" />
         <entry key="..\:/Users/Benjababe/Desktop/CZ3004-MDP/Android/app/src/main/res/layout/activity_main.xml" value="0.1" />
@@ -34,8 +36,6 @@
         <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/layout/item_scan_bluetooth_device.xml" value="0.1" />
         <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/layout/layout.xml" value="0.16875" />
         <entry key="..\:/Users/Benjababe/Desktop/MDP/Android/app/src/main/res/layout/map_cell.xml" value="0.2368659420289855" />
-        <entry key="app/src/main/res/layout/fragment_left_col.xml" value="0.19270833333333334" />
-        <entry key="app/src/main/res/layout/fragment_map.xml" value="0.19270833333333334" />
       </map>
     </option>
   </component>

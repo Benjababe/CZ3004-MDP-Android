@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         fragmentMap = (MapFragment) fragmentManager.findFragmentById(R.id.fragmentMap);
         fragmentLeftCol = (LeftColFragment) fragmentManager.findFragmentById(R.id.fragmentLeftCol);
         fragmentRightCol = (RightColFragment) fragmentManager.findFragmentById(R.id.fragmentRightCol);
-
+        fragmentRightCol.setFragmentMap(fragmentMap);
         fragmentMap.setLeftColFragment(fragmentLeftCol);
         LinearLayout mainLayout = findViewById(R.id.main_layout);
         mainLayout.setOnDragListener(new OutOfBoundsDragListener());
@@ -176,8 +176,14 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
         switch (json.getInt("type")) {
             case MOVE_FORWARD:
                 fragmentLeftCol.setRoboStatus("MOVE FORWARD");
-                fragmentMap.moveRobot(true);
-                fragmentLeftCol.setRobotPosition(fragmentMap.getPositionString());
+                int t = val.getInt("time");
+                for(int i =0;i<t;i++)
+                {
+                    fragmentMap.moveRobot(true);
+                    fragmentLeftCol.setRobotPosition(fragmentMap.getPositionString());
+                }
+                //fragmentMap.moveRobot(true);
+                //fragmentLeftCol.setRobotPosition(fragmentMap.getPositionString());
                 break;
 
             case MOVE_BACKWARD:
@@ -202,6 +208,10 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
                 fragmentLeftCol.setRoboStatus("ADD OBSTACLE");
                 x = val.getInt("X");
                 y = val.getInt("Y");
+                if(x < 0) x= 0;
+                if(x > 19) x =19;
+                if(y < 0) y = 0;
+                if(y > 19) y = 19;
                 imageID = val.getInt("IMAGE_ID");
                 // direction = val.getInt("DIRECTION");
                 drawObstacleImg(x, y, imageID);
@@ -217,6 +227,10 @@ public class MainActivity extends AppCompatActivity implements BluetoothListener
                 fragmentLeftCol.setRoboStatus("Updating Robot");
                 x = val.getInt("x");
                 y = val.getInt("y");
+                if(x < 0) x= 0;
+                if(x > 19) x =19;
+                if(y < 0) y = 0;
+                if(y > 19) y = 19;
                 direction = val.getInt("direction");
                 fragmentMap.setRobotDirection(direction);
                 fragmentMap.setRobotXY(x, y);

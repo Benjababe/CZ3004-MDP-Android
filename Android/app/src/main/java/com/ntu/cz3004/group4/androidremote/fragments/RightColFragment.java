@@ -18,22 +18,26 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 
 import com.ntu.cz3004.group4.androidremote.R;
+import com.ntu.cz3004.group4.androidremote.arena.ObstacleInfo;
 import com.ntu.cz3004.group4.androidremote.bluetooth.BluetoothService;
 import com.ntu.cz3004.group4.androidremote.bluetooth.Packet;
 
 import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONStringer;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
-public class RightColFragment extends Fragment {
+public class RightColFragment<pulbic> extends Fragment {
     Button btnConnect, btnImageRecog, btnFastestPath;
     RadioGroup spawnGroup;
     SwitchCompat switchTiltControl;
     ImageButton btnSteerLeft, btnSteerRight;
-
+    ArrayList<JSONObject> S1 = new ArrayList<JSONObject>();
     BluetoothService bluetoothService;
     public boolean btEnabled = false;
-
+    private MapFragment fragmentMap;
     public RightColFragment() {
     }
 
@@ -69,6 +73,9 @@ public class RightColFragment extends Fragment {
         if (bluetoothService.state == STATE_CONNECTED) {
             try {
                 Packet packet = new Packet(A_IMG_REC);
+
+                S1 = fragmentMap.getObstacleList();
+                packet.setObstacleList(S1);
                 bluetoothService.write(packet.getJSONString().getBytes(StandardCharsets.UTF_8));
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -125,5 +132,9 @@ public class RightColFragment extends Fragment {
 
     public Button getBtnConnect() {
         return btnConnect;
+    }
+    public void setFragmentMap(MapFragment obj)
+    {
+        this.fragmentMap = obj;
     }
 }

@@ -44,9 +44,11 @@ import com.ntu.cz3004.group4.androidremote.bluetooth.Packet;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 public class MapFragment extends Fragment {
@@ -54,6 +56,8 @@ public class MapFragment extends Fragment {
     int x, y, btnH, btnW, drawn = 0;
     int robotRotation = 0;
 
+    //ObstacleList
+    ArrayList <JSONObject> ObstacleList = new ArrayList<JSONObject>();
     // robot defaults to facing north
     int robotDirection = NORTH;
 
@@ -150,7 +154,6 @@ public class MapFragment extends Fragment {
 
         ArenaButton btn = v.findViewById(obstacleInfo.btnID);
         sendRemoveObstacle(obstacleInfo);
-
         obstacles.remove(obstacleID);
         btn.setText("");
         btn.obstacleID = -1;
@@ -213,7 +216,7 @@ public class MapFragment extends Fragment {
                 for (int obsID = 1; obsID <= 400; obsID++) {
                     // finds next obstacle id
                     if (!obstacles.containsKey(obsID)) {
-                        queryObstacleDirection(obsID, this.id, this.x, this.y);
+                        queryObstacleDirection(obsID,this.id, this.x,this.y);
                         break;
                     }
                 }
@@ -278,7 +281,7 @@ public class MapFragment extends Fragment {
 
         // retrieves direction of image on obstacle through radiobuttons
         AlertDialog.Builder builder = new AlertDialog.Builder(this.requireContext());
-        builder.setTitle(String.format("Choose direction of image (%d, %d)", x, y));
+        builder.setTitle("Choose direction of image"+"("+x+","+y+")");
         builder.setSingleChoiceItems(directions, 0, (dialogInterface, i) -> dirSelected[0] = directions[i]);
 
         // confirm to add obstacle
@@ -367,20 +370,40 @@ public class MapFragment extends Fragment {
 
 
     private void sendAddObstacleData(ObstacleInfo obstacleInfo) {
-        if (bluetoothService.state == STATE_CONNECTED)
+        if (bluetoothService.state == STATE_CONNECTED) {
             bluetoothService.write(obstacleInfo.toAddBytes());
+            ObstacleList.add(obstacleInfo.obToString());
+        }
         else
             Toast.makeText(this.getContext(), btAlert, Toast.LENGTH_LONG).show();
     }
 
 
     private void sendRemoveObstacle(ObstacleInfo obstacleInfo) {
-        if (bluetoothService.state == STATE_CONNECTED)
+        if (bluetoothService.state == STATE_CONNECTED) {
             bluetoothService.write(obstacleInfo.toRemoveBytes());
+            ObstacleList = removeJson(ObstacleList,obstacleInfo.obToString());
+
+        }
         else
             Toast.makeText(this.getContext(), btAlert, Toast.LENGTH_LONG).show();
     }
-
+    private ArrayList<JSONObject> removeJson(ArrayList<JSONObject> list,JSONObject obj)
+    {
+        for(int i = 0;i <list.size();i++)
+        {
+            try {
+                if(list.get(i).getInt("obstacle_id") == obj.getInt("obstacle_id"))
+                {
+                    list.remove(i);
+                    break;
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
+    }
 
     private void sendSpawnRobot() {
         if (bluetoothService.state == STATE_CONNECTED) {
@@ -552,6 +575,7 @@ public class MapFragment extends Fragment {
             if (obstacleInfo.btnID == btnID)
                 return key;
         }
+
         return -1;
     }
 
@@ -572,6 +596,10 @@ public class MapFragment extends Fragment {
 
     public void setRobotDirection(int direction) {
         this.robotDirection = direction;
+    }
+    public ArrayList<JSONObject> getObstacleList()
+    {
+        return ObstacleList;
     }
 
 }
