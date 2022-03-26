@@ -24,24 +24,26 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidRemote">
         <activity
-            android:name=".bluetooth.BluetoothDevicesActivity"
-            android:exported="false"
-            android:screenOrientation="landscape">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-        <activity
-            android:name=".MainActivity"
+            android:name=".splashActivity"
             android:exported="true"
             android:screenOrientation="landscape"
-            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
+            android:theme="@style/Theme.AndroidRemote.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".bluetooth.BluetoothDevicesActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.AndroidRemote"></activity>
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.AndroidRemote.NoActionBar"></activity>
     </application>
 
 </manifest>
